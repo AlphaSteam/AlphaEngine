@@ -1,4 +1,4 @@
-use crate::alpha_engine::*
+use crate::alpha_engine::*;
 fn main() {
     
 }

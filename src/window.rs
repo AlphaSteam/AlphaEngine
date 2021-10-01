@@ -17,8 +17,8 @@ fn new(&self) -> Window {
     let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
     Window{
-        event_loop: event_loop,
-        display: display
+        event_loop,
+        display
     }
 }
 

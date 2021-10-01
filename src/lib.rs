@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate glium;
 use glium::{glutin, Surface};
 use std::time::{Duration, Instant};
