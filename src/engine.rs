@@ -1,17 +1,21 @@
 
-mod system;
 pub use crate::system::System;
-struct Engine {
+pub use crate::game::Game;
+pub struct Engine{
 system: System
 
 }
+impl Engine{
 
-impl Engine {
-
-    fn new(&self, system: System) -> Engine{
+    pub fn new(game: Game) -> Engine{
+      
         Engine {
-            system
+            system:  System::new(game)
         }
+    }
+    pub fn start_main_loop(&self){
+
+        self.system.start_main_loop();
     }
 
 }

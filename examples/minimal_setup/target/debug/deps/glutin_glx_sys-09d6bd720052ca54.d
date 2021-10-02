@@ -1,0 +1,11 @@
+/home/alphasteam/Escritorio/Dev/Motor de videojuegos/AlphaEngine/examples/minimal_setup/target/debug/deps/glutin_glx_sys-09d6bd720052ca54.rmeta: /home/alphasteam/.cargo/registry/src/github.com-1ecc6299db9ec823/glutin_glx_sys-0.1.7/src/lib.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_bindings.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_extra_bindings.rs
+
+/home/alphasteam/Escritorio/Dev/Motor de videojuegos/AlphaEngine/examples/minimal_setup/target/debug/deps/libglutin_glx_sys-09d6bd720052ca54.rlib: /home/alphasteam/.cargo/registry/src/github.com-1ecc6299db9ec823/glutin_glx_sys-0.1.7/src/lib.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_bindings.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_extra_bindings.rs
+
+/home/alphasteam/Escritorio/Dev/Motor de videojuegos/AlphaEngine/examples/minimal_setup/target/debug/deps/glutin_glx_sys-09d6bd720052ca54.d: /home/alphasteam/.cargo/registry/src/github.com-1ecc6299db9ec823/glutin_glx_sys-0.1.7/src/lib.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_bindings.rs /home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_extra_bindings.rs
+
+/home/alphasteam/.cargo/registry/src/github.com-1ecc6299db9ec823/glutin_glx_sys-0.1.7/src/lib.rs:
+/home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_bindings.rs:
+/home/alphasteam/Escritorio/Dev/Motor\ de\ videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out/glx_extra_bindings.rs:
+
+# env-dep:OUT_DIR=/home/alphasteam/Escritorio/Dev/Motor de videojuegos/AlphaEngine/examples/minimal_setup/target/debug/build/glutin_glx_sys-7e5c927603ee9916/out
