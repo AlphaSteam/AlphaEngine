@@ -1,31 +1,25 @@
 extern crate glium;
 
-use glium::glutin;
 pub use crate::system::System;
+use glium::glutin;
 
-pub struct Window{
+pub struct Window {
     pub event_loop: glutin::event_loop::EventLoop<()>,
-    pub display:  glium::Display,
-
+    pub display: glium::Display,
 }
 
 impl Window {
-pub fn new() -> Window {
+    pub fn new() -> Window {
+        let event_loop = glutin::event_loop::EventLoop::new();
+        let window_builder = glutin::window::WindowBuilder::new();
+        let context_builder = glutin::ContextBuilder::new();
+        let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
-    let event_loop =  glutin::event_loop::EventLoop::new();
-    let window_builder = glutin::window::WindowBuilder::new();
-    let context_builder = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
-
-    Window{
-        event_loop,
-        display
+        Window {
+            event_loop,
+            display,
+        }
     }
-}
 
-pub fn update(&self){
-    
-}
-
-
+    pub fn update(&self) {}
 }

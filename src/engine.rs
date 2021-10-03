@@ -1,22 +1,15 @@
-
-pub use crate::private_system::PrivateSystem;
 pub use crate::game::Game;
+pub use crate::private_system::PrivateSystem;
 pub struct Engine {
-system: PrivateSystem  
-
+    private_system: PrivateSystem,
 }
-impl  Engine  {
-
-    pub fn new(game: Game ) -> Engine   {
-        let system = PrivateSystem::new(game);
-        system.start();
-        Engine {
-            system
-        }
+impl Engine {
+    pub fn new(game: Game) -> Engine {
+        let private_system = PrivateSystem::new(game);
+        private_system.start();
+        Engine { private_system }
     }
-    pub fn start_main_loop(self){
-
-        self.system.start_main_loop();
+    pub fn start_main_loop(self) {
+        self.private_system.start_main_loop();
     }
-
 }
