@@ -9,7 +9,7 @@ pub use crate::window::Window;
 
 pub struct PrivateSystem {
     event_loop: EventLoop<()>,
-    private_system: System,
+    system: System,
 }
 
 impl PrivateSystem {
@@ -20,21 +20,21 @@ impl PrivateSystem {
 
         let private_system = PrivateSystem {
             event_loop,
-            private_system: System::new(game, display),
+            system: System::new(game, display),
         };
 
         private_system
     }
     pub fn start(&self) {
-        self.private_system.start();
+        self.system.start();
     }
 
     pub fn start_main_loop(self) {
-        let mut private_system = self.private_system;
+        let mut system = self.system;
         self.event_loop.run(move |ev, _, control_flow| {
             let next_frame_time = Instant::now() + Duration::from_nanos(16_666_667);
 
-            let _next_frame_time_f32 = Instant::now().elapsed().as_secs_f32()
+            let next_frame_time_f32 = Instant::now().elapsed().as_secs_f32()
                 + Duration::from_nanos(16_666_667).as_secs_f32();
             *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
             match ev {
@@ -48,7 +48,7 @@ impl PrivateSystem {
                 _ => (),
             }
 
-            private_system.update();
+            system.update(next_frame_time_f32);
         });
     }
 }

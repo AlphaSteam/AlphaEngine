@@ -24,8 +24,12 @@ impl System {
         self.game.start(self);
     }
 
-    pub fn update(&mut self) {
-        self.game.update(self, 0.0);
+    pub fn update(&mut self, time_step: f32) {
+        self.game.update(self, time_step);
         self.renderer.render(&self.display);
+    }
+    pub fn stop(&self) {
+        self.game.stop(self);
+        self.renderer.stop();
     }
 }

@@ -16,4 +16,5 @@ impl Renderer {
 
         target.finish().unwrap();
     }
+    pub fn stop(&self) {}
 }
