@@ -1,14 +1,14 @@
 
-pub use crate::system::System;
+pub use crate::private_system::PrivateSystem;
 pub use crate::game::Game;
-pub struct Engine{
-system: System 
+pub struct Engine {
+system: PrivateSystem  
 
 }
-impl Engine {
+impl  Engine  {
 
-    pub fn new(game: Game) -> Engine  {
-        let system = System::new(game);
+    pub fn new(game: Game ) -> Engine   {
+        let system = PrivateSystem::new(game);
         system.start();
         Engine {
             system

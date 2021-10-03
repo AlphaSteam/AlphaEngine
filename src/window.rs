@@ -1,6 +1,7 @@
 extern crate glium;
 
 use glium::glutin;
+pub use crate::system::System;
 
 pub struct Window{
     pub event_loop: glutin::event_loop::EventLoop<()>,
@@ -20,6 +21,10 @@ pub fn new() -> Window {
         event_loop,
         display
     }
+}
+
+pub fn update(&self){
+    
 }
 
 
