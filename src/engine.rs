@@ -2,18 +2,19 @@
 pub use crate::system::System;
 pub use crate::game::Game;
 pub struct Engine{
-system: System
+system: System 
 
 }
-impl Engine{
+impl Engine {
 
-    pub fn new(game: Game) -> Engine{
-      
+    pub fn new(game: Game) -> Engine  {
+        let system = System::new(game);
+        system.start();
         Engine {
-            system:  System::new(game)
+            system
         }
     }
-    pub fn start_main_loop(&self){
+    pub fn start_main_loop(self){
 
         self.system.start_main_loop();
     }
