@@ -1,5 +1,5 @@
 extern crate alpha_engine;
-use crate::alpha_engine::{engine, game, private_system, system};
+use crate::alpha_engine::{engine, game, system};
 use crate::engine::Engine;
 use crate::game::Game;
 use crate::system::System;

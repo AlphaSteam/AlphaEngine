@@ -1,7 +1,7 @@
 use glium::Display;
 
 pub use crate::game::Game;
-pub use crate::renderer::Renderer;
+pub use crate::rendering::renderer::Renderer;
 pub use crate::window::Window;
 
 pub struct System {

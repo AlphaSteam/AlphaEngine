@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use glutin::event_loop::EventLoop;
 
 pub use crate::game::Game;
-pub use crate::renderer::Renderer;
+pub use crate::rendering::renderer::Renderer;
 pub use crate::system::System;
 pub use crate::window::Window;
 

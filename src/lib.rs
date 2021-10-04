@@ -1,6 +1,6 @@
 pub mod engine;
 pub mod game;
-pub mod private_system;
-pub mod renderer;
+mod private_system;
+mod rendering;
 pub mod system;
-pub mod window;
+mod window;
