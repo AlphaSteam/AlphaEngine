@@ -1,5 +1,5 @@
 pub use crate::private_system::PrivateSystem;
-pub use crate::system::System;
+pub use crate::sys::system::System;
 
 pub struct Game {
     user_start: fn(system: &System),

@@ -3,6 +3,11 @@ use glium::Display;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 pub use crate::window::Window;
+/**
+Struct that hosts the engine functions
+
+
+*/
 
 pub struct System {
     game: Game,

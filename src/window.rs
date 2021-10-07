@@ -1,6 +1,6 @@
 extern crate glium;
 
-pub use crate::system::System;
+pub use crate::sys::system::System;
 use glium::glutin;
 
 pub struct Window {

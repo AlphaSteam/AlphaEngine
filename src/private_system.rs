@@ -4,7 +4,7 @@ use glutin::event_loop::EventLoop;
 
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
-pub use crate::system::System;
+pub use crate::sys::system::System;
 pub use crate::window::Window;
 
 pub struct PrivateSystem {

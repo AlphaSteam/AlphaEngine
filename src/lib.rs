@@ -2,5 +2,5 @@ pub mod engine;
 pub mod game;
 mod private_system;
 mod rendering;
-pub mod system;
+pub mod sys;
 mod window;
