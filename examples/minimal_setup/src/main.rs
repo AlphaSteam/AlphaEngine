@@ -1,8 +1,8 @@
 extern crate alpha_engine;
-use crate::alpha_engine::{engine, game, system};
+use crate::alpha_engine::{engine, game, sys};
 use crate::engine::Engine;
 use crate::game::Game;
-use crate::system::System;
+use crate::sys::system::System;
 
 fn start(system: &System) {}
 fn update(system: &System, time_step: f32) {}

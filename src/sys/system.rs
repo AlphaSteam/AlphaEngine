@@ -3,38 +3,35 @@ use glium::Display;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 pub use crate::window::Window;
+use super::game_object::GameObject;
 /**
 Struct that hosts the engine functions
 
 
 */
-
+#[derive(Debug)]
 pub struct System {
-    game: Game,
-    renderer: Renderer,
-    display: Display,
+    game_objects: Vec<GameObject>,
+
 }
 
 impl System {
-    pub fn new(game: Game, display: Display) -> System {
-        let system = System {
-            game,
-            renderer: Renderer::new(),
-            display: display,
-        };
 
-        system
+    pub fn new()->Self{
+        Self{
+            game_objects: Vec::new(),
+        }
     }
-    pub fn start(&self) {
-        self.game.start(self);
+    pub fn game_objects(&self) -> &Vec<GameObject> {
+        &self.game_objects
     }
 
-    pub fn update(&mut self, time_step: f32) {
-        self.game.update(self, time_step);
-        self.renderer.render(&self.display);
+    pub fn game_objects_mut(&mut self) -> &mut Vec<GameObject> {
+        &mut self.game_objects
     }
-    pub fn stop(&self) {
-        self.game.stop(self);
-        self.renderer.stop();
+  
+    pub fn add_game_object(&mut self,game_object:GameObject){
+        self.game_objects_mut().push(game_object)
     }
+    
 }

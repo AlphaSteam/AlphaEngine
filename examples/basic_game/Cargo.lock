@@ -82,6 +82,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "basic_game"
+version = "0.1.0"
+dependencies = [
+ "alpha_engine",
+ "nalgebra-glm",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -643,13 +651,6 @@ name = "minimal-lexical"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c835948974f68e0bd58636fc6c5b1fbff7b297e3046f11b3b3c18bbac012c6d"
-
-[[package]]
-name = "minimal_setup"
-version = "0.1.0"
-dependencies = [
- "alpha_engine",
-]
 
 [[package]]
 name = "miniz_oxide"

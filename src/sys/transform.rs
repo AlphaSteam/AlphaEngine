@@ -1,4 +1,4 @@
-pub use crate::sys::system::System;
+pub use crate::sys::private_system::PrivateSystem;
 use glm::{identity, Quat};
 use nalgebra_glm as glm;
 use nalgebra_glm::{Mat4, Vec3};
@@ -7,7 +7,7 @@ use nalgebra_glm::{Mat4, Vec3};
 Struct in charge of managing an object's local position in the world.
 */
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Transform {
     local_translation: Vec3,
     local_rotation: Quat,
