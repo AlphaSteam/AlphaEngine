@@ -1,4 +1,4 @@
-use glium::{Display, IndexBuffer, VertexBuffer};
+use glium::{IndexBuffer, VertexBuffer};
 
 use super::game_object::GameObject;
 pub use crate::game::Game;
@@ -15,6 +15,7 @@ pub struct System {
     game_objects: Vec<GameObject>,
     vertex_buffers: Vec<VertexBuffer<Vertex>>,
     index_buffers: Vec<IndexBuffer<u32>>,
+    textures: Vec<glium::texture::SrgbTexture2d>,
 }
 
 impl System {
@@ -23,6 +24,7 @@ impl System {
             game_objects: Vec::new(),
             vertex_buffers: Vec::new(),
             index_buffers: Vec::new(),
+            textures: Vec::new(),
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -55,7 +57,20 @@ impl System {
     pub fn index_buffers_mut(&mut self) -> &mut Vec<IndexBuffer<u32>> {
         &mut self.index_buffers
     }
+
     pub fn add_index_buffer(&mut self, index_buffer: IndexBuffer<u32>) {
         self.index_buffers_mut().push(index_buffer)
+    }
+
+    pub fn textures(&self) -> &Vec<glium::texture::SrgbTexture2d> {
+        &self.textures
+    }
+
+    pub fn textures_mut(&mut self) -> &mut Vec<glium::texture::SrgbTexture2d> {
+        &mut self.textures
+    }
+
+    pub fn add_texture(&mut self, texture: glium::texture::SrgbTexture2d) {
+        self.textures_mut().push(texture)
     }
 }

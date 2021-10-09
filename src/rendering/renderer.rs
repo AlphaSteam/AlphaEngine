@@ -1,9 +1,9 @@
 extern crate glium;
 pub use crate::rendering::vertex::Vertex;
-use crate::sys::system::System;
 pub use crate::window::Window;
+use crate::{game, sys::system::System};
 use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface};
-
+use image::io::Reader as ImageReader;
 pub struct Renderer {}
 
 impl Renderer {
@@ -25,6 +25,25 @@ impl Renderer {
             )
             .unwrap();
             system.add_index_buffer(index_buffer);
+
+            let texture_path = game_object.texture_path();
+            /*   let image = image::load(
+                           Cursor::new(&include_bytes!("/sprites/" + texture_path)),
+                           image::ImageFormat::Png,
+                       )
+
+                       .unwrap()
+                       .to_rgba8();
+            */
+
+            let img = ImageReader::open("myimage.png")?.decode()?;
+            let image_dimensions = image.dimensions();
+            let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
+                &image.into_raw(),
+                image_dimensions,
+            );
+            let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
+            system.add_texture(texture);
         }
     }
     pub fn render(&self, display: &Display, system: &mut System) {

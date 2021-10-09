@@ -1,5 +1,4 @@
 use crate::rendering::vertex::Vertex;
-use glium::{Display, VertexBuffer};
 
 /**
     Struct that represents an object mesh.
@@ -55,15 +54,19 @@ impl Mesh {
         let vertices = vec![
             Vertex {
                 position: [-1.0, 1.0, 0.0],
+                tex_coords: [0.0, 0.0],
             },
             Vertex {
                 position: [1.0, 1.0, 0.0],
+                tex_coords: [0.0, 1.0],
             },
             Vertex {
                 position: [-1.0, -1.0, 0.0],
+                tex_coords: [1.0, 0.0],
             },
             Vertex {
                 position: [1.0, -1.0, 0.0],
+                tex_coords: [1.0, 1.0],
             },
         ];
         let indices = vec![0, 1, 2, 1, 3, 2];

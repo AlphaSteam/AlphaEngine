@@ -23,7 +23,7 @@ impl PrivateSystem {
         let system = PrivateSystem {
             game,
             renderer: Renderer::new(),
-            display: display,
+            display,
             system: System::new(),
         };
 

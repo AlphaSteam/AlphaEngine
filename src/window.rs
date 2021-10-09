@@ -12,7 +12,7 @@ impl Window {
     pub fn new() -> Window {
         let event_loop = glutin::event_loop::EventLoop::new();
         let window_builder = glutin::window::WindowBuilder::new();
-        let context_builder = glutin::ContextBuilder::new();
+        let context_builder = glutin::ContextBuilder::new().with_depth_buffer(24);
         let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
         Window {
