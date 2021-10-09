@@ -1,9 +1,10 @@
-use glium::Display;
+use glium::{Display, IndexBuffer, VertexBuffer};
 
+use super::game_object::GameObject;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
+use crate::rendering::vertex::Vertex;
 pub use crate::window::Window;
-use super::game_object::GameObject;
 /**
 Struct that hosts the engine functions
 
@@ -12,14 +13,16 @@ Struct that hosts the engine functions
 #[derive(Debug)]
 pub struct System {
     game_objects: Vec<GameObject>,
-
+    vertex_buffers: Vec<VertexBuffer<Vertex>>,
+    index_buffers: Vec<IndexBuffer<u32>>,
 }
 
 impl System {
-
-    pub fn new()->Self{
-        Self{
+    pub fn new() -> Self {
+        Self {
             game_objects: Vec::new(),
+            vertex_buffers: Vec::new(),
+            index_buffers: Vec::new(),
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -29,9 +32,30 @@ impl System {
     pub fn game_objects_mut(&mut self) -> &mut Vec<GameObject> {
         &mut self.game_objects
     }
-  
-    pub fn add_game_object(&mut self,game_object:GameObject){
+
+    pub fn add_game_object(&mut self, game_object: GameObject) {
         self.game_objects_mut().push(game_object)
     }
-    
+
+    pub fn vertex_buffers(&self) -> &Vec<VertexBuffer<Vertex>> {
+        &self.vertex_buffers
+    }
+
+    pub fn vertex_buffers_mut(&mut self) -> &mut Vec<VertexBuffer<Vertex>> {
+        &mut self.vertex_buffers
+    }
+    pub fn add_vertex_buffer(&mut self, vertex_buffer: VertexBuffer<Vertex>) {
+        self.vertex_buffers_mut().push(vertex_buffer)
+    }
+
+    pub fn index_buffers(&self) -> &Vec<IndexBuffer<u32>> {
+        &self.index_buffers
+    }
+
+    pub fn index_buffers_mut(&mut self) -> &mut Vec<IndexBuffer<u32>> {
+        &mut self.index_buffers
+    }
+    pub fn add_index_buffer(&mut self, index_buffer: IndexBuffer<u32>) {
+        self.index_buffers_mut().push(index_buffer)
+    }
 }

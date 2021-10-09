@@ -13,11 +13,10 @@ fn start(system: &mut System) {
     );
     let sprite = GameObject::game_object_from_sprite(transform);
     system.add_game_object(sprite);
-}
-fn update(system: &mut System, time_step: f32) {
     let game_objects = system.game_objects();
-    println!("Game objects: {:?}", game_objects)
+    //println!("Game objects: {:?}", game_objects)
 }
+fn update(system: &mut System, time_step: f32) {}
 fn stop(system: &mut System) {}
 fn main() {
     let game = Game::new(start, update, stop);

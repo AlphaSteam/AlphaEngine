@@ -1,7 +1,8 @@
 extern crate glium;
 pub use crate::rendering::vertex::Vertex;
+use crate::sys::system::System;
 pub use crate::window::Window;
-use glium::{uniform, Display, Surface};
+use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface};
 
 pub struct Renderer {}
 
@@ -9,24 +10,25 @@ impl Renderer {
     pub fn new() -> Renderer {
         Renderer {}
     }
-    pub fn start(&self, display: &Display){
+    pub fn start(&self, display: &Display, system: &mut System) {
+        let game_objects = system.game_objects_mut().clone();
+        for game_object in game_objects {
+            let shape = game_object.mesh().vertices();
+            let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
+            system.add_vertex_buffer(vertex_buffer);
 
+            let indices = game_object.mesh().indices();
+            let index_buffer = glium::IndexBuffer::new(
+                display,
+                glium::index::PrimitiveType::TrianglesList,
+                &indices,
+            )
+            .unwrap();
+            system.add_index_buffer(index_buffer);
+        }
     }
-    pub fn render(&self, display: &Display) {
+    pub fn render(&self, display: &Display, system: &mut System) {
         let mut target = display.draw();
-        let vertex1 = Vertex {
-            position: [-0.5, -0.5, 0.0],
-        };
-        let vertex2 = Vertex {
-            position: [0.0, 0.5, 0.0],
-        };
-        let vertex3 = Vertex {
-            position: [0.5, -0.25, 0.0],
-        };
-        let shape = vec![vertex1, vertex2, vertex3];
-        let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
         let vertex_shader_src = r#"
         #version 140
 
@@ -49,16 +51,31 @@ impl Renderer {
             glium::Program::from_source(display, vertex_shader_src, fragment_shader_src, None)
                 .unwrap();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
+        let params = glium::DrawParameters {
+            // GO BACK TO THIS
+            /*   depth: glium::Depth {
+                test: glium::draw_parameters::DepthTest::IfLess,
+                write: true,
+                ..Default::default()
+            }, */
+            blend: Blend::alpha_blending(),
+            backface_culling: BackfaceCullingMode::CullCounterClockwise,
+            ..Default::default()
+        };
+        for n in 0..system.game_objects().len() {
+            let vertex_buffer = &system.vertex_buffers()[n];
+            let index_buffer = &system.index_buffers()[n];
+            target
+                .draw(
+                    vertex_buffer,
+                    index_buffer,
+                    &program,
+                    &glium::uniforms::EmptyUniforms,
+                    &params,
+                )
+                .unwrap();
+        }
 
-        /* target
-        .draw(
-            &vertex_buffer,
-            &indices,
-            &program,
-            &glium::uniforms::EmptyUniforms,
-            &Default::default(),
-        )
-        .unwrap(); */
         target.finish().unwrap();
     }
     pub fn stop(&self) {}
