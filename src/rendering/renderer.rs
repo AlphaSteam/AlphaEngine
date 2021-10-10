@@ -1,9 +1,9 @@
 extern crate glium;
 pub use crate::rendering::vertex::Vertex;
+use crate::sys::system::System;
 pub use crate::window::Window;
-use crate::{game, sys::system::System};
-use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface};
-use image::io::Reader as ImageReader;
+use glium::{BackfaceCullingMode, Blend, Display, Surface};
+use image::GenericImageView;
 pub struct Renderer {}
 
 impl Renderer {
@@ -36,10 +36,10 @@ impl Renderer {
                        .to_rgba8();
             */
 
-            let img = ImageReader::open("myimage.png")?.decode()?;
+            let image = image::open(texture_path).unwrap();
             let image_dimensions = image.dimensions();
             let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
-                &image.into_raw(),
+                &image.to_bytes(),
                 image_dimensions,
             );
             let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
@@ -52,18 +52,28 @@ impl Renderer {
         #version 140
 
         in vec3 position;
-    
+        in vec2 tex_coords;
+        
+
+        out vec2 v_tex_coords;
+
         void main() {
             gl_Position = vec4(position, 1.0);
+            v_tex_coords = tex_coords;
         }
 "#;
         let fragment_shader_src = r#"
         #version 140
+        
+        in vec2 v_tex_coords;
 
         out vec4 color;
-    
+        
+        uniform sampler2D diffuse_tex;
+
         void main() {
-            color = vec4(1.0, 0.0, 0.0, 1.0);
+            vec3 diffuse_color = texture(diffuse_tex, v_tex_coords).rgb;
+            color = vec4(diffuse_color, 1.0);
         }
 "#;
         let program =

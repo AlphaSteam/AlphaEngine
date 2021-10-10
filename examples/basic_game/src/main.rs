@@ -11,7 +11,8 @@ fn start(system: &mut System) {
         glm::quat(0.0, 2.0, 0.0, 0.0),
         glm::vec3(2.0, 0.0, 0.0),
     );
-    let sprite = GameObject::game_object_from_sprite(transform);
+    let sprite =
+        GameObject::game_object_from_sprite(transform, "src/sprites/placeholder.png".to_string());
     system.add_game_object(sprite);
 }
 fn update(system: &mut System, _time_step: f32) {}
