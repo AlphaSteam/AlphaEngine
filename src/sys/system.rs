@@ -1,6 +1,8 @@
 use glium::{IndexBuffer, VertexBuffer};
 
-use super::game_object::GameObject;
+use super::cam::camera::Camera;
+use super::cam::projection_ortho::ProjectionOrtho;
+use super::game_object::{GameObject, Transform};
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 use crate::rendering::vertex::Vertex;
@@ -16,15 +18,18 @@ pub struct System {
     vertex_buffers: Vec<VertexBuffer<Vertex>>,
     index_buffers: Vec<IndexBuffer<u32>>,
     textures: Vec<glium::texture::SrgbTexture2d>,
+    camera: Camera,
 }
 
 impl System {
     pub fn new() -> Self {
+        let projection = ProjectionOrtho::new(0.0, 1080.0, 0.0, 1440.0, -1.0, 1.0);
         Self {
             game_objects: Vec::new(),
             vertex_buffers: Vec::new(),
             index_buffers: Vec::new(),
             textures: Vec::new(),
+            camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -72,5 +77,14 @@ impl System {
 
     pub fn add_texture(&mut self, texture: glium::texture::SrgbTexture2d) {
         self.textures_mut().push(texture)
+    }
+    pub fn camera(&self) -> &Camera {
+        &self.camera
+    }
+    pub fn camera_mut(&mut self) -> &mut Camera {
+        &mut self.camera
+    }
+    pub fn set_camera(&mut self, camera: Camera) {
+        self.camera = camera;
     }
 }

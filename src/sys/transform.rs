@@ -1,14 +1,14 @@
+use crate::sys::axes::Axis;
 pub use crate::sys::private_system::PrivateSystem;
 use glm::{identity, Quat};
 use glm::{Mat4, Vec3};
-
 /**
 Struct in charge of managing an object's local position in the world.
 */
 
 #[derive(Copy, Clone, Debug)]
 pub struct Transform {
-    local_translation: Vec3,
+    local_position: Vec3,
     local_rotation: Quat,
     local_scale: Vec3,
 }
@@ -21,13 +21,13 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(0.0, 0.0, 0.0), glm::quat(0.0, 0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0));
+    let transform = Transform::new(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0));
      ```
     */
-    pub fn new(translation: Vec3, rotation: Quat, scale: Vec3) -> Self {
+    pub fn new(position: Vec3, scale: Vec3) -> Self {
         let component = Self {
-            local_translation: translation,
-            local_rotation: rotation,
+            local_position: position,
+            local_rotation: glm::quat_identity(),
             local_scale: scale,
         };
 
@@ -35,35 +35,41 @@ impl Transform {
     }
 
     /**
-    Inmutable access to local translation.
+    Inmutable access to local position.
 
     # Example
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    assert_eq!(*transform.local_translation(), glm::vec3(1.0, 0.0, 0.0));
+    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
+    assert_eq!(*transform.local_position(), glm::vec3(1.0, 0.0, 0.0));
      ```
     */
-    pub fn local_translation(&self) -> &Vec3 {
-        &self.local_translation
+    pub fn local_position(&self) -> &Vec3 {
+        &self.local_position
     }
 
     /**
-    Mutable access to local translation.
+    Mutable access to local position.
 
     # Example
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    let mut local_translation_mut = transform.local_translation_mut();
-    *local_translation_mut = glm::vec3(0.0, 0.0, 0.0);
-    assert_eq!(*transform.local_translation(), glm::vec3(0.0, 0.0, 0.0));
+    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
+    let mut local_position_mut = transform.local_position_mut();
+    *local_position_mut = glm::vec3(0.0, 0.0, 0.0);
+    assert_eq!(*transform.local_position(), glm::vec3(0.0, 0.0, 0.0));
      ```
     */
-    pub fn local_translation_mut(&mut self) -> &mut Vec3 {
-        &mut self.local_translation
+    pub fn local_position_mut(&mut self) -> &mut Vec3 {
+        &mut self.local_position
+    }
+
+    pub fn translate(mut self, position: [f32; 3]) {
+        let position_vec3 = glm::vec3(position[0], position[1], position[2]);
+
+        self.local_position += position_vec3;
     }
 
     /**
@@ -88,7 +94,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
+    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
     let mut local_rotation_mut = transform.local_rotation_mut();
     *local_rotation_mut = glm::quat(1.0, 1.0, 1.0, 1.0);
     assert_eq!(*transform.local_rotation(), glm::quat(1.0, 1.0, 1.0, 1.0));
@@ -98,6 +104,16 @@ impl Transform {
         &mut self.local_rotation
     }
 
+    pub fn rotate(&mut self, axis: Axis, angle: f32) {
+        let axis_value = axis.value();
+        self.local_rotation = glm::quat_rotate(&self.local_rotation, angle, &axis_value);
+    }
+
+    pub fn scale(&mut self, scale: [f32; 3]) {
+        let scale_vec3 = glm::vec3(scale[0], scale[1], scale[2]);
+        self.local_scale = glm::matrix_comp_mult(&self.local_scale, &scale_vec3);
+    }
+
     /**
     Inmutable access to local scale.
 
@@ -105,7 +121,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
+    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
     assert_eq!(*transform.local_scale(), glm::vec3(2.0, 0.0, 0.0));
      ```
     */
@@ -120,7 +136,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
+    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
     let mut local_scale_mut = transform.local_scale_mut();
     *local_scale_mut = glm::vec3(0.0, 1.0, 1.0);
     assert_eq!(*transform.local_scale(), glm::vec3(0.0, 1.0, 1.0));
@@ -131,7 +147,7 @@ impl Transform {
     }
 
     /**
-    Returns model matrix from local translation, scale and rotation.
+    Returns model matrix from local position, scale and rotation.
 
     # Example
      ```
@@ -140,11 +156,26 @@ impl Transform {
      ```
     */
     pub fn get_model_matrix(&self) -> Mat4 {
-        let translation_matrix = glm::translate(&identity(), &self.local_translation);
-        let rotation_matrix = glm::quat_to_mat4(&self.local_rotation);
-        let scale_matrix = glm::scale(&glm::identity(), &self.local_scale);
-
-        let model_matrix = translation_matrix * rotation_matrix * scale_matrix;
+        let mut model_matrix = identity();
+        model_matrix = glm::translate(&model_matrix, &self.local_position);
+        model_matrix = glm::translate(
+            &model_matrix,
+            &glm::vec3(
+                0.5 * self.local_scale()[0],
+                0.5 * self.local_scale()[1],
+                0.5 * self.local_scale()[2],
+            ),
+        );
+        model_matrix = model_matrix * glm::quat_cast(&self.local_rotation);
+        model_matrix = glm::translate(
+            &model_matrix,
+            &glm::vec3(
+                -0.5 * self.local_scale()[0],
+                -0.5 * self.local_scale()[1],
+                -0.5 * self.local_scale()[2],
+            ),
+        );
+        model_matrix = glm::scale(&model_matrix, &self.local_scale);
         model_matrix
     }
     /**
@@ -157,7 +188,7 @@ impl Transform {
      ```
     */
     pub fn get_up_vector(&self) -> Vec3 {
-        glm::quat_rotate_vec3(&self.local_rotation, &glm::vec3(0.0, 0.0, 1.0))
+        glm::quat_rotate_vec3(&self.local_rotation, &glm::vec3(0.0, 1.0, 0.0))
     }
 
     /**
@@ -170,7 +201,8 @@ impl Transform {
      ```
     */
     pub fn get_forward_vector(&self) -> Vec3 {
-        glm::quat_rotate_vec3(&self.local_rotation, &glm::vec3(0.0, 1.0, 0.0))
+        let forward = glm::quat_rotate_vec3(&self.local_rotation, &glm::vec3(0.0, 0.0, 1.0));
+        forward
     }
 
     /**
@@ -198,11 +230,7 @@ impl Transform {
     pub fn get_view_matrix(&self) -> Mat4 {
         let up = self.get_up_vector();
         let forward = self.get_forward_vector();
-
-        glm::look_at(
-            &self.local_translation,
-            &(&self.local_translation + forward),
-            &up,
-        )
+        let look_at = glm::look_at(&self.local_position, &(self.local_position + forward), &up);
+        look_at
     }
 }

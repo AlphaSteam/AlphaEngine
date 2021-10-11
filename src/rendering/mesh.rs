@@ -53,23 +53,23 @@ impl Mesh {
     pub fn create_rectangle() -> Self {
         let vertices = vec![
             Vertex {
-                position: [-1.0, 1.0, 0.0],
+                position: [0.0, 1.0, 0.0],
                 tex_coords: [0.0, 1.0],
+            },
+            Vertex {
+                position: [0.0, 0.0, 0.0],
+                tex_coords: [0.0, 0.0],
+            },
+            Vertex {
+                position: [1.0, 0.0, 0.0],
+                tex_coords: [1.0, 0.0],
             },
             Vertex {
                 position: [1.0, 1.0, 0.0],
                 tex_coords: [1.0, 1.0],
             },
-            Vertex {
-                position: [-1.0, -1.0, 0.0],
-                tex_coords: [0.0, 0.0],
-            },
-            Vertex {
-                position: [1.0, -1.0, 0.0],
-                tex_coords: [1.0, 0.0],
-            },
         ];
-        let indices = vec![0, 1, 2, 1, 3, 2];
+        let indices = vec![0, 1, 2, 3, 0, 2];
         let mesh = Mesh { vertices, indices };
         mesh
     }

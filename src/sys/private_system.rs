@@ -20,14 +20,15 @@ pub struct PrivateSystem {
 
 impl PrivateSystem {
     pub fn new(game: Game, display: Display) -> PrivateSystem {
-        let system = PrivateSystem {
+        let system = System::new();
+        let private_system = PrivateSystem {
             game,
             renderer: Renderer::new(),
             display,
-            system: System::new(),
+            system,
         };
 
-        system
+        private_system
     }
     pub fn start(&mut self) {
         let system = &mut self.system;

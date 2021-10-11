@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["Srgb", "backface", "glium", "nalgebra", "rgba"]
+  "cSpell.words": [
+    "Srgb",
+    "backface",
+    "glium",
+    "mult",
+    "nalgebra",
+    "rgba",
+    "zfar",
+    "znear"
+  ]
 }

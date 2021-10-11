@@ -1,3 +1,5 @@
+use image::{DynamicImage, GenericImageView};
+
 pub use crate::rendering::mesh::Mesh;
 pub use crate::sys::transform::Transform;
 
@@ -10,27 +12,32 @@ Struct that represents an object of the game.
 pub struct GameObject {
     transform: Transform,
     mesh: Mesh,
-    texture_path: String,
+    texture: DynamicImage,
 }
 
 impl GameObject {
-    pub fn new(transform: Transform, mesh: Mesh, texture_path: String) -> Self {
+    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture_path: String) -> Self {
+        let position_vec3 = glm::vec3(position[0], position[1], position[2]);
+        let scale_vec3 = glm::vec3(size[0], size[1], size[2]);
+        let transform = Transform::new(position_vec3, scale_vec3);
+        let texture = image::open(texture_path).unwrap();
+
         let game_object = Self {
             transform,
             mesh,
-            texture_path,
+            texture,
         };
 
         game_object
     }
-    pub fn game_object_from_sprite(transform: Transform, texture_path: String) -> Self {
+    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String) -> Self {
         let mesh = Mesh::create_rectangle();
-        let sprite = GameObject {
-            transform,
-            mesh,
-            texture_path,
-        };
-        sprite
+
+        let texture = image::open(texture_path.clone()).unwrap();
+        let texture_w = texture.width() as f32;
+        let texture_h = texture.height() as f32;
+
+        GameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
     }
 
     pub fn mesh(&self) -> &Mesh {
@@ -48,11 +55,11 @@ impl GameObject {
         &mut self.transform
     }
 
-    pub fn texture_path(&self) -> &String {
-        &self.texture_path
+    pub fn texture(&self) -> &DynamicImage {
+        &self.texture
     }
 
-    pub fn texture_path_mut(&mut self) -> &mut String {
-        &mut self.texture_path
+    pub fn texture_mut(&mut self) -> &mut DynamicImage {
+        &mut self.texture
     }
 }
