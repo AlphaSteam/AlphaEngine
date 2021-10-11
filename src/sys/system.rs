@@ -1,12 +1,13 @@
-use glium::{IndexBuffer, VertexBuffer};
-
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
-use super::game_object::{GameObject, Transform};
+use super::fullscreen::Fullscreen;
+use super::game_object::GameObject;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 use crate::rendering::vertex::Vertex;
 pub use crate::window::Window;
+use glium::{Display, IndexBuffer, VertexBuffer};
+use glutin::dpi::PhysicalSize;
 /**
 Struct that hosts the engine functions
 
@@ -19,17 +20,27 @@ pub struct System {
     index_buffers: Vec<IndexBuffer<u32>>,
     textures: Vec<glium::texture::SrgbTexture2d>,
     camera: Camera,
+    display: Display,
 }
 
 impl System {
-    pub fn new() -> Self {
-        let projection = ProjectionOrtho::new(0.0, 1080.0, 0.0, 1440.0, -1.0, 1.0);
+    pub fn new(display: Display) -> Self {
+        let window_resolution = display.gl_window().window().inner_size();
+        let projection = ProjectionOrtho::new(
+            0.0,
+            window_resolution.width as f32,
+            0.0,
+            window_resolution.height as f32,
+            -10.0,
+            10.0,
+        );
         Self {
             game_objects: Vec::new(),
             vertex_buffers: Vec::new(),
             index_buffers: Vec::new(),
             textures: Vec::new(),
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
+            display,
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -86,5 +97,27 @@ impl System {
     }
     pub fn set_camera(&mut self, camera: Camera) {
         self.camera = camera;
+    }
+
+    pub fn get_window_resolution(&self) -> [f32; 2] {
+        let size = self.display.gl_window().window().inner_size();
+        [size.width as f32, size.height as f32]
+    }
+    pub fn set_window_resolution(&self, resolution: [u32; 2]) {
+        let size = PhysicalSize {
+            width: resolution[0],
+            height: resolution[1],
+        };
+        self.display.gl_window().window().set_maximized(false);
+        self.display.gl_window().window().set_inner_size(size);
+    }
+    pub fn set_window_fullscreen(&self, fullscreen: Fullscreen) {
+        self.display
+            .gl_window()
+            .window()
+            .set_fullscreen(fullscreen.value(self.display.gl_window().window().current_monitor()));
+    }
+    pub fn set_window_maximized(&self, maximized: bool) {
+        self.display.gl_window().window().set_maximized(maximized);
     }
 }

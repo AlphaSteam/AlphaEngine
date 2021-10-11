@@ -20,7 +20,7 @@ pub struct PrivateSystem {
 
 impl PrivateSystem {
     pub fn new(game: Game, display: Display) -> PrivateSystem {
-        let system = System::new();
+        let system = System::new(display.clone());
         let private_system = PrivateSystem {
             game,
             renderer: Renderer::new(),

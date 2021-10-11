@@ -89,7 +89,7 @@ impl Renderer {
                 ..Default::default()
             },*/
             blend: Blend::alpha_blending(),
-            //backface_culling: BackfaceCullingMode::CullClockwise,
+            backface_culling: BackfaceCullingMode::CullClockwise,
             ..Default::default()
         };
 
