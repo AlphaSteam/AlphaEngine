@@ -1,11 +1,13 @@
+use std::collections::HashMap;
+
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
 use super::game_object::GameObject;
 pub use crate::game::Game;
-pub use crate::rendering::renderer::Renderer;
-use crate::rendering::vertex::Vertex;
+use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
+use crate::{rendering::vertex::Vertex, shaders::Shader};
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
 /**
@@ -21,6 +23,10 @@ pub struct System {
     textures: Vec<glium::texture::SrgbTexture2d>,
     camera: Camera,
     display: Display,
+    current_shader: Shader,
+    fonts: HashMap<String, Font>,
+    text: Vec<Text>,
+    text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
 }
 
 impl System {
@@ -41,6 +47,10 @@ impl System {
             textures: Vec::new(),
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
             display,
+            current_shader: Shader::Basic,
+            fonts: HashMap::new(),
+            text: Vec::new(),
+            text_buffers: Vec::new(),
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -119,5 +129,46 @@ impl System {
     }
     pub fn set_window_maximized(&self, maximized: bool) {
         self.display.gl_window().window().set_maximized(maximized);
+    }
+    pub fn set_current_shader(&mut self, shader: Shader) {
+        self.current_shader = shader
+    }
+    pub fn current_shader(&self) -> &Shader {
+        &self.current_shader
+    }
+
+    pub fn add_font(&mut self, font_name: &str, font_path: &str) {
+        let font = Font::new(font_path, &self.display);
+        self.fonts.insert(font_name.to_string(), font);
+    }
+    pub fn fonts(&self) -> &HashMap<String, Font> {
+        &self.fonts
+    }
+    pub fn fonts_mut(&mut self) -> &mut HashMap<String, Font> {
+        &mut self.fonts
+    }
+    pub fn text(&self) -> &Vec<Text> {
+        &self.text
+    }
+    pub fn text_mut(&mut self) -> &mut Vec<Text> {
+        &mut self.text
+    }
+    pub fn add_text_buffer(&mut self, vertex_buffer: VertexBuffer<Vertex>, texture: char) {
+        self.text_buffers.push((vertex_buffer, texture))
+    }
+    pub fn text_buffers(&self) -> &Vec<(VertexBuffer<Vertex>, char)> {
+        &self.text_buffers
+    }
+    pub fn render_text(
+        &mut self,
+        text: String,
+        font: String,
+        position: [f32; 2],
+        scale: [f32; 2],
+        rotation: f32,
+        color: [f32; 3],
+    ) {
+        let text = Text::new(text, font, position, scale, rotation, color);
+        self.text.push(text);
     }
 }

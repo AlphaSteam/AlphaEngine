@@ -1,13 +1,15 @@
 {
   "cSpell.words": [
-    "Borderless",
-    "Srgb",
     "backface",
+    "Borderless",
+    "freetype",
     "fullscreen",
     "glium",
+    "Grayscale",
     "mult",
     "nalgebra",
     "rgba",
+    "Srgb",
     "zfar",
     "znear"
   ]

@@ -1,9 +1,16 @@
 extern crate glium;
 pub use crate::rendering::vertex::Vertex;
-use crate::sys::system::System;
 pub use crate::window::Window;
-use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface};
+use crate::{
+    shaders::Shader,
+    sys::{
+        cam::{projection::Projection, projection_ortho::ProjectionOrtho},
+        system::System,
+    },
+};
+use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface, VertexBuffer};
 use image::GenericImageView;
+
 pub struct Renderer {}
 
 impl Renderer {
@@ -36,50 +43,61 @@ impl Renderer {
             let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
             system.add_texture(texture);
         }
+        let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
+
+        let texts = system.text_mut().clone();
+        for txt in texts {
+            let text = &txt.text;
+            let x = &txt.position[0];
+            let y = &txt.position[1];
+
+            for c in text.chars() {
+                let font = &system.fonts()[&txt.font];
+                let char = &font.characters()[&c];
+
+                let xpos = x + char.bearing[0] * txt.scale[0];
+                let ypos = y - (char.size.1 as f32 - char.bearing[1]) * txt.scale[1];
+
+                let w = char.size.0 as f32 * txt.scale[0];
+                let h = char.size.1 as f32 * txt.scale[1];
+
+                let vertices = vec![
+                    Vertex {
+                        position: [xpos, ypos + h, 0.0],
+                        tex_coords: [0.0, 0.0],
+                    },
+                    Vertex {
+                        position: [xpos, ypos, 0.0],
+                        tex_coords: [0.0, 1.0],
+                    },
+                    Vertex {
+                        position: [xpos + w, ypos, 0.0],
+                        tex_coords: [1.0, 1.0],
+                    },
+                    Vertex {
+                        position: [xpos + w, ypos + h, 0.0],
+                        tex_coords: [1.0, 0.0],
+                    },
+                ];
+
+                let vertex_buffer = glium::VertexBuffer::new(display, &vertices).unwrap();
+                text_buffers.push((vertex_buffer, c));
+            }
+        }
+        for text_buffer in text_buffers {
+            system.add_text_buffer(text_buffer.0, text_buffer.1);
+        }
     }
     pub fn render(&self, display: &Display, system: &mut System) {
         let mut target = display.draw();
-        let vertex_shader_src = r#"
-    
-         #version 330
 
-         in vec3 position;
-         in vec2 tex_coords;
-  
-         out vec2 v_tex_coords;
-
-         uniform mat4 projection;
-         uniform mat4 view;
-         uniform mat4 model;
-
-         void main() {
-             mat4 view_model = view * model;
-             v_tex_coords = tex_coords;
-             gl_Position = projection  * view * model * vec4(position, 1.0) ;
-         }
-
-"#;
-        let fragment_shader_src = r#"
-
-         #version 330
-
-         in vec2 v_tex_coords;
-
-         out vec4 color;
-
-        uniform sampler2D diffuse_tex;
-
-         void main() {
-            vec4 diffuse_color = texture(diffuse_tex, v_tex_coords) ;
-            if(diffuse_color.a < 0.1)
-                discard;
-            color = vec4(diffuse_color);
-         }
-"#;
-
-        let program =
-            glium::Program::from_source(display, vertex_shader_src, fragment_shader_src, None)
-                .unwrap();
+        let program = glium::Program::from_source(
+            display,
+            system.current_shader().source_code().0.as_str(),
+            system.current_shader().source_code().1.as_str(),
+            None,
+        )
+        .unwrap();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         let params = glium::DrawParameters {
             // GO BACK TO THIS
@@ -116,6 +134,51 @@ impl Renderer {
                 .unwrap();
         }
 
+        // Draw text
+        let program = glium::Program::from_source(
+            display,
+            Shader::Text.source_code().0.as_str(),
+            Shader::Text.source_code().1.as_str(),
+            None,
+        )
+        .unwrap();
+        let window_resolution = system.get_window_resolution();
+        let projection = *ProjectionOrtho::new(
+            0.0,
+            window_resolution[0],
+            0.0,
+            window_resolution[1],
+            -1.0,
+            1.0,
+        )
+        .get_projection()
+        .as_ref();
+        for n in 0..system.text().len() {
+            let vertex_buffer = &system.text_buffers()[n].0;
+
+            let index_buffer = &glium::IndexBuffer::new(
+                display,
+                glium::index::PrimitiveType::TrianglesList,
+                &vec![0_u32, 1, 2, 3, 0, 2],
+            )
+            .unwrap();
+            let text = &system.text()[n];
+            let c = &system.text_buffers()[n].1;
+            let font = &system.fonts()[&text.font];
+            let char = &font.characters()[&c];
+
+            let texture = &char.texture;
+
+            target
+                .draw(
+                    vertex_buffer,
+                    index_buffer,
+                    &program,
+                    &uniform! { projection: projection, text: texture, text_colors: text.color},
+                    &params,
+                )
+                .unwrap();
+        }
         target.finish().unwrap();
     }
     pub fn stop(&self) {}
