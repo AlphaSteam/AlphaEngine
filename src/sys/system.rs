@@ -26,7 +26,7 @@ pub struct System {
     current_shader: Shader,
     fonts: HashMap<String, Font>,
     text: Vec<Text>,
-    text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
+    text_buffers: Vec<(VertexBuffer<Vertex>, char, Text)>,
 }
 
 impl System {
@@ -153,10 +153,15 @@ impl System {
     pub fn text_mut(&mut self) -> &mut Vec<Text> {
         &mut self.text
     }
-    pub fn add_text_buffer(&mut self, vertex_buffer: VertexBuffer<Vertex>, texture: char) {
-        self.text_buffers.push((vertex_buffer, texture))
+    pub fn add_text_buffer(
+        &mut self,
+        vertex_buffer: VertexBuffer<Vertex>,
+        texture: char,
+        text: Text,
+    ) {
+        self.text_buffers.push((vertex_buffer, texture, text))
     }
-    pub fn text_buffers(&self) -> &Vec<(VertexBuffer<Vertex>, char)> {
+    pub fn text_buffers(&self) -> &Vec<(VertexBuffer<Vertex>, char, Text)> {
         &self.text_buffers
     }
     pub fn render_text(

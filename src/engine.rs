@@ -11,8 +11,8 @@ pub struct Engine {
     private_system: PrivateSystem,
 }
 impl Engine {
-    pub fn new(game: Game) -> Engine {        
-         let window = Window::new();
+    pub fn new(game: Game) -> Engine {
+        let window = Window::new();
         let display = window.display;
         let event_loop = window.event_loop;
         let mut private_system = PrivateSystem::new(game, display);
@@ -24,9 +24,9 @@ impl Engine {
 
         engine
     }
-  
+
     pub fn start_main_loop(self) {
-        let mut private_system =self.private_system;
+        let mut private_system = self.private_system;
         self.event_loop.run(move |ev, _, control_flow| {
             let next_frame_time = Instant::now() + Duration::from_nanos(16_666_667);
 

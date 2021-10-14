@@ -23,7 +23,7 @@ impl PrivateSystem {
         let system = System::new(display.clone());
         let private_system = PrivateSystem {
             game,
-            renderer: Renderer::new(),
+            renderer: Renderer::new(display.clone()),
             display,
             system,
         };

@@ -14,14 +14,26 @@ fn start(system: &mut System) {
     system.set_window_fullscreen(Fullscreen::False);
     system.set_window_resolution([600, 800]);
     system.set_window_maximized(true);
-    system.set_current_shader(Shader::Basic);
+    system.set_current_shader(Shader::Inverted);
 
-    system.add_font("Arial", "src/fonts/ArialCE.ttf");
-    system.render_text(
-        "Test".to_string(),
+    system.add_font("Arial", "/home/alphasteam/Escritorio/Dev/Motor de videojuegos/alpha_engine/examples/basic_game/src/fonts/ArialCE.ttf");
+
+    system.add_font("Arial italic", "/home/alphasteam/Escritorio/Dev/Motor de videojuegos/alpha_engine/examples/basic_game/src/fonts/ArialCEItalic.ttf");
+
+    /*   system.render_text(
+        "asdfghjkl".to_string(),
         "Arial".to_string(),
-        [100.0, 100.0],
-        [1.0, 1.0],
+        [700.0, 1000.0],
+        [0.2, 0.2],
+        0.0,
+        [1.0, 0.0, 0.0],
+    ); */
+
+    system.render_text(
+        "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".to_string(),
+        "Arial italic".to_string(),
+        [500.0, 1000.0],
+        [0.5, 0.5],
         0.0,
         [1.0, 1.0, 1.0],
     );
@@ -44,7 +56,7 @@ fn start(system: &mut System) {
 
     let mut sprite = GameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
-        "src/sprites/placeholder.png".to_string(),
+        "/home/alphasteam/Escritorio/Dev/Motor de videojuegos/alpha_engine/examples/basic_game/src/sprites/placeholder.png".to_string(),
     );
     sprite.transform_mut().scale([1.0, 1.5, 1.0]);
     sprite.transform_mut().rotate(Axis::ZAxis, -90.0);
@@ -55,7 +67,7 @@ fn start(system: &mut System) {
 
     let sprite2 = GameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
-        "src/sprites/placeholder.png".to_string(),
+        "/home/alphasteam/Escritorio/Dev/Motor de videojuegos/alpha_engine/examples/basic_game/src/sprites/placeholder.png".to_string(),
     );
     system.add_game_object(sprite2);
 }
@@ -64,6 +76,7 @@ fn update(system: &mut System, _time_step: f32) {
     //println!("Window size: {:?}", window_size)
 }
 fn stop(_system: &mut System) {}
+
 fn main() {
     let game = Game::new(start, update, stop);
     let engine = Engine::new(game);
