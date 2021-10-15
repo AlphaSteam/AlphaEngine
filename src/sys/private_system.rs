@@ -1,5 +1,6 @@
 use glium::Display;
 
+use crate::event::event_manager::EventManager;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 pub use crate::sys::system::System;
@@ -19,8 +20,8 @@ pub struct PrivateSystem {
 }
 
 impl PrivateSystem {
-    pub fn new(game: Game, display: Display) -> PrivateSystem {
-        let system = System::new(display.clone());
+    pub fn new(game: Game, display: Display, event_manager: EventManager) -> PrivateSystem {
+        let system = System::new(display.clone(), event_manager);
         let private_system = PrivateSystem {
             game,
             renderer: Renderer::new(),
@@ -45,5 +46,8 @@ impl PrivateSystem {
         let system = &mut self.system;
         self.game.stop(system);
         self.renderer.stop();
+    }
+    pub fn system(&self) -> &System {
+        &self.system
     }
 }

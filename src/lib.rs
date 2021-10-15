@@ -1,6 +1,8 @@
+pub use glutin::event::KeyboardInput;
 extern crate image;
 extern crate nalgebra_glm as glm;
 pub mod engine;
+pub mod event;
 pub mod game;
 mod rendering;
 pub mod shaders;

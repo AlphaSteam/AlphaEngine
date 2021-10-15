@@ -2,6 +2,7 @@ extern crate glium;
 
 pub use crate::sys::private_system::PrivateSystem;
 use glium::glutin;
+use glutin::{Api, GlProfile, GlRequest};
 
 pub struct Window {
     pub event_loop: glutin::event_loop::EventLoop<()>,
@@ -9,10 +10,15 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new() -> Window {
+    pub fn new(win_title: String) -> Window {
         let event_loop = glutin::event_loop::EventLoop::new();
-        let window_builder = glutin::window::WindowBuilder::new().with_maximized(true);
-        let context_builder = glutin::ContextBuilder::new();
+        let window_builder = glutin::window::WindowBuilder::new()
+            .with_maximized(true)
+            .with_title(win_title);
+        let context_builder = glutin::ContextBuilder::new()
+            .with_gl_profile(GlProfile::Core)
+            .with_srgb(true)
+            .with_gl(GlRequest::Specific(Api::OpenGl, (3, 2)));
         let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
         Window {

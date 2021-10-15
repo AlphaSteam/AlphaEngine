@@ -24,7 +24,6 @@ impl Font {
 
             // Draw it.
             if let Some(q) = font.outline_glyph(q_glyph) {
-                //println!("{:?}", q.glyph());
                 let w = q.px_bounds().width() as u32;
                 let h = q.px_bounds().height() as u32;
                 let mut img = RgbImage::new(w, h);

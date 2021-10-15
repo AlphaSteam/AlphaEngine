@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 extern crate alpha_engine;
+use alpha_engine::event::{DeviceEvent, KeyboardInput};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
 use game::Game;
@@ -9,7 +10,6 @@ use sys::{
     game_object::GameObject, system::System,
 };
 use text::font::Font;
-
 fn start(system: &mut System) {
     system.set_window_fullscreen(Fullscreen::False);
     system.set_window_resolution([600, 800]);
@@ -20,8 +20,8 @@ fn start(system: &mut System) {
     system.render_text(
         "Test".to_string(),
         "Arial".to_string(),
-        [100.0, 100.0],
-        [1.0, 1.0],
+        [200.0, 200.0],
+        [10.0, 10.0],
         0.0,
         [1.0, 1.0, 1.0],
     );
@@ -57,15 +57,25 @@ fn start(system: &mut System) {
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
     );
+
     system.add_game_object(sprite2);
 }
 fn update(system: &mut System, _time_step: f32) {
     let _window_size = system.get_window_resolution();
-    //println!("Window size: {:?}", window_size)
+    let event_manager = system.event_manager_mut();
+    event_manager.set_key_callback(process_inputs);
 }
 fn stop(_system: &mut System) {}
+
+fn process_inputs(key: KeyboardInput, event: DeviceEvent) {
+    println!("event, {:?}", event);
+    println!("key, {:?}", key);
+}
+fn device_added(event: DeviceEvent) {
+    println!("{:?}", event);
+}
 fn main() {
     let game = Game::new(start, update, stop);
-    let engine = Engine::new(game);
+    let engine = Engine::new(game, "Basic_game".to_string());
     engine.start_main_loop();
 }
