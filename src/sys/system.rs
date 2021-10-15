@@ -18,7 +18,6 @@ Struct that hosts the engine functions
 
 
 */
-#[derive(Debug)]
 pub struct System {
     game_objects: Vec<GameObject>,
     vertex_buffers: Vec<VertexBuffer<Vertex>>,

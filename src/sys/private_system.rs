@@ -50,4 +50,7 @@ impl PrivateSystem {
     pub fn system(&self) -> &System {
         &self.system
     }
+    pub fn system_mut(&mut self) -> &mut System {
+        &mut self.system
+    }
 }

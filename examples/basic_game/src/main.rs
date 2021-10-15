@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 extern crate alpha_engine;
-use alpha_engine::event::{DeviceEvent, KeyboardInput};
+use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
 use game::Game;
@@ -59,20 +59,42 @@ fn start(system: &mut System) {
     );
 
     system.add_game_object(sprite2);
+    let event_manager = system.event_manager_mut();
+    event_manager.set_key_callback(process_inputs);
+    event_manager.set_device_added_callback(device_added);
+    event_manager.set_device_removed_callback(device_removed);
+    event_manager.set_motion_callback(motion);
+    event_manager.set_mouse_motion_callback(mouse_motion);
 }
 fn update(system: &mut System, _time_step: f32) {
     let _window_size = system.get_window_resolution();
-    let event_manager = system.event_manager_mut();
-    event_manager.set_key_callback(process_inputs);
 }
 fn stop(_system: &mut System) {}
 
-fn process_inputs(key: KeyboardInput, event: DeviceEvent) {
-    println!("event, {:?}", event);
-    println!("key, {:?}", key);
+fn process_inputs(key: KeyboardInput, _device_id: DeviceId) {
+    let key_code = key.virtual_keycode;
+    match key_code {
+        None => println!("Key not recognized"),
+        Some(virtual_key) => match virtual_key {
+            VirtualKeyCode::D => match key.state {
+                alpha_engine::event::ElementState::Pressed => println!("D pressed"),
+                alpha_engine::event::ElementState::Released => println!("D released"),
+            },
+            _ => (),
+        },
+    };
 }
-fn device_added(event: DeviceEvent) {
-    println!("{:?}", event);
+fn device_added(device_id: DeviceId) {
+    println!("Device {:?} added.", device_id);
+}
+fn device_removed(device_id: DeviceId) {
+    println!("Device {:?} removed.", device_id);
+}
+fn motion(axis: u32, value: f64, device_id: DeviceId) {
+    println!("AxisMotion, {:?}, {:?}, {:?}", axis, value, device_id)
+}
+fn mouse_motion(delta: (f64, f64), device_id: DeviceId) {
+    println!("MouseMotion, {:?}, {:?}", delta, device_id)
 }
 fn main() {
     let game = Game::new(start, update, stop);

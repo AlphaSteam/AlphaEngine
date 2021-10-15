@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use glutin::event::DeviceId;
+use glutin::event::{DeviceEvent, DeviceId};
 use glutin::event_loop::EventLoop;
 
 use crate::event::event_manager::EventManager;
@@ -27,7 +27,9 @@ impl Engine {
 
         engine
     }
-
+    pub fn read_event(ev: DeviceEvent, device_id: DeviceId) {
+        println!("{:?}, {:?}", ev, device_id);
+    }
     pub fn start_main_loop(self) {
         let mut private_system = self.private_system;
         self.event_loop.run(move |ev, _, control_flow| {
@@ -42,29 +44,68 @@ impl Engine {
                         *control_flow = glutin::event_loop::ControlFlow::Exit;
                         return;
                     }
+                    glutin::event::WindowEvent::MouseInput {
+                        state,
+                        button,
+                        device_id,
+                        ..
+                    } => private_system
+                        .system()
+                        .event_manager()
+                        .run_mouse_input_callback(state, button, device_id),
+                    glutin::event::WindowEvent::CursorMoved {
+                        device_id,
+                        position,
+                        ..
+                    } => private_system
+                        .system()
+                        .event_manager()
+                        .run_cursor_moved_callback(position, device_id),
+                    glutin::event::WindowEvent::AxisMotion {
+                        axis,
+                        value,
+                        device_id,
+                    } => private_system
+                        .system()
+                        .event_manager()
+                        .run_axis_motion_callback(axis, value, device_id),
                     _ => return,
                 },
-                glutin::event::Event::DeviceEvent { event, .. } => match event {
-                    /*
-
-                    glutin::event::DeviceEvent::MouseMotion { delta } => todo!(),
-                    glutin::event::DeviceEvent::MouseWheel { delta } => todo!(),
-                    glutin::event::DeviceEvent::Motion { axis, value } => {}
-                    glutin::event::DeviceEvent::Button { button, state } => todo!(),
-
-                    glutin::event::DeviceEvent::Text { codepoint } => todo!(), */
-                    glutin::event::DeviceEvent::Removed => {
-                        println!("{:?}", unsafe { DeviceId::dummy() })
-                    }
+                glutin::event::Event::DeviceEvent {
+                    event, device_id, ..
+                } => match event {
+                    glutin::event::DeviceEvent::MouseMotion { delta } => private_system
+                        .system()
+                        .event_manager()
+                        .run_mouse_motion_callback(delta, device_id),
+                    glutin::event::DeviceEvent::MouseWheel { delta } => private_system
+                        .system()
+                        .event_manager()
+                        .run_mouse_wheel_callback(delta, device_id),
+                    glutin::event::DeviceEvent::Motion { axis, value } => private_system
+                        .system()
+                        .event_manager()
+                        .run_motion_callback(axis, value, device_id),
+                    glutin::event::DeviceEvent::Button { button, state } => private_system
+                        .system()
+                        .event_manager()
+                        .run_button_callback(button, state, device_id),
+                    glutin::event::DeviceEvent::Text { codepoint } => private_system
+                        .system()
+                        .event_manager()
+                        .run_text_callback(codepoint, device_id),
+                    glutin::event::DeviceEvent::Removed => private_system
+                        .system()
+                        .event_manager()
+                        .run_device_removed_callback(device_id),
                     glutin::event::DeviceEvent::Added => private_system
                         .system()
                         .event_manager()
-                        .run_device_added_callback(event),
+                        .run_device_added_callback(device_id),
                     glutin::event::DeviceEvent::Key(key) => private_system
-                        .system()
-                        .event_manager()
-                        .run_key_callback(key, event),
-                    _ => (),
+                        .system_mut()
+                        .event_manager_mut()
+                        .run_key_callback(key, device_id),
                 },
                 _ => (),
             }
