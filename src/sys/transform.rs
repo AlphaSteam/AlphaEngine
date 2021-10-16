@@ -42,7 +42,6 @@ impl Transform {
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
     let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    assert_eq!(*transform.local_position(), glm::vec3(1.0, 0.0, 0.0));
      ```
     */
     pub fn local_position(&self) -> &Vec3 {
@@ -59,7 +58,6 @@ impl Transform {
     let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
     let mut local_position_mut = transform.local_position_mut();
     *local_position_mut = glm::vec3(0.0, 0.0, 0.0);
-    assert_eq!(*transform.local_position(), glm::vec3(0.0, 0.0, 0.0));
      ```
     */
     pub fn local_position_mut(&mut self) -> &mut Vec3 {
@@ -138,7 +136,6 @@ impl Transform {
     let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
     let mut local_scale_mut = transform.local_scale_mut();
     *local_scale_mut = glm::vec3(0.0, 1.0, 1.0);
-    assert_eq!(*transform.local_scale(), glm::vec3(0.0, 1.0, 1.0));
      ```
     */
     pub fn local_scale_mut(&mut self) -> &mut Vec3 {
