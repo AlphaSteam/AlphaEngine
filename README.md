@@ -21,4 +21,4 @@ After that we need to add `extern crate alpha_engine;` to the main.rs file of th
 
 ## Generate documentation
 
-Run `cargo docs` just to generate the documentation or `cargo docs --open` to also open it in the browser.
+Run `cargo doc` just to generate the documentation or `cargo doc --open` to also open it in the browser.
