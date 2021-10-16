@@ -33,10 +33,12 @@ impl Engine {
         let mut private_system = self.private_system;
         let mut event_manager = self.event_manager.clone();
         self.event_loop.run(move |ev, _, control_flow| {
-            let next_frame_time = Instant::now() + Duration::from_nanos(1);
+            let next_frame_time = Instant::now()
+                + Duration::from_nanos(private_system.system().frame_time_target_nanos());
 
             let next_frame_time_f32 = Instant::now().elapsed().as_secs_f32()
-                + Duration::from_nanos(16_666_667).as_secs_f32();
+                + Duration::from_nanos(private_system.system().frame_time_target_nanos())
+                    .as_secs_f32();
             *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
             match ev {
                 glutin::event::Event::WindowEvent { event, .. } => match event {

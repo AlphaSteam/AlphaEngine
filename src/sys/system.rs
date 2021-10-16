@@ -26,6 +26,7 @@ pub struct System {
     fonts: HashMap<String, Font>,
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
+    frame_time_target_nanos: u64,
 }
 
 impl System {
@@ -50,6 +51,7 @@ impl System {
             fonts: HashMap::new(),
             text: Vec::new(),
             text_buffers: Vec::new(),
+            frame_time_target_nanos: 16_666_667,
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -108,7 +110,7 @@ impl System {
         self.camera = camera;
     }
 
-    pub fn get_window_resolution(&self) -> [f32; 2] {
+    pub fn get_window_resolution(&mut self) -> [f32; 2] {
         let size = self.display.gl_window().window().inner_size();
         [size.width as f32, size.height as f32]
     }
@@ -169,5 +171,12 @@ impl System {
     ) {
         let text = Text::new(text, font, position, scale, rotation, color);
         self.text.push(text);
+    }
+    pub fn set_framerate_target(&mut self, framerate: u64) {
+        let nanos = 1 / framerate;
+        self.frame_time_target_nanos = nanos * 1000000000
+    }
+    pub fn frame_time_target_nanos(&self) -> u64 {
+        self.frame_time_target_nanos
     }
 }

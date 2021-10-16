@@ -9,6 +9,7 @@
     "Grayscale",
     "mult",
     "nalgebra",
+    "nanos",
     "rgba",
     "Srgb",
     "zfar",
