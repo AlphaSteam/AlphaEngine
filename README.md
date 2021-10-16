@@ -18,3 +18,7 @@
 To create a new project with the engine, we must create a new rust project with `cargo new` (new folder) or `cargo init` (current folder) and specify the directory in which the engine resides.
 For that we edit the cargo.toml file of the project and add `alpha_engine = { path = "path/to/engine/folder" }` under `[dependencies]`
 After that we need to add `extern crate alpha_engine;` to the main.rs file of the new project and we can start using the engine.
+
+## Generate documentation
+
+Run `cargo docs` just to generate the documentation or `cargo docs --open` to also open it in the browser.
