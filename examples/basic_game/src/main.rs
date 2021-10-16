@@ -83,7 +83,13 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
         None => println!("Key not recognized"),
         Some(virtual_key) => match virtual_key {
             VirtualKeyCode::D => match key.state {
-                alpha_engine::event::ElementState::Pressed => println!("D pressed"),
+                alpha_engine::event::ElementState::Pressed => {
+                    println!("D pressed");
+                    system
+                        .camera_mut()
+                        .transform_mut()
+                        .translate([100.0, 0.0, 0.0]);
+                }
                 alpha_engine::event::ElementState::Released => println!("D released"),
             },
             VirtualKeyCode::P => match key.state {
@@ -108,6 +114,6 @@ fn mouse_motion(_delta: (f64, f64), _device_id: DeviceId) {
 }
 fn main() {
     let game = Game::new(start, update, stop);
-    let engine = Engine::new(game, "Basic_game".to_string());
+    let engine = Engine::new(game, "Basic game".to_string());
     engine.start_main_loop();
 }

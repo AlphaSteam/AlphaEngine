@@ -1,14 +1,16 @@
 extern crate alpha_engine;
+use alpha_engine::event::event_manager::EventManager;
+
 use crate::alpha_engine::{engine, game, sys};
 use crate::engine::Engine;
 use crate::game::Game;
 use crate::sys::system::System;
 
-fn start(system: &mut System) {}
-fn update(system: &mut System, time_step: f32) {}
-fn stop(system: &mut System) {}
+fn start(_system: &mut System, _event_manager: &mut EventManager) {}
+fn update(_system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {}
+fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 fn main() {
     let game = Game::new(start, update, stop);
-    let engine = Engine::new(game);
+    let engine = Engine::new(game, "Minimal setup".to_string());
     engine.start_main_loop();
 }
