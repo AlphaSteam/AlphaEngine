@@ -66,10 +66,9 @@ impl Transform {
         &mut self.local_position
     }
 
-    pub fn translate(mut self, position: [f32; 3]) {
+    pub fn translate(&mut self, position: [f32; 3]) {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
-
-        self.local_position += position_vec3;
+        self.local_position = self.local_position + position_vec3;
     }
 
     /**

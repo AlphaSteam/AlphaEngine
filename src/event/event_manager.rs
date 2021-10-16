@@ -4,9 +4,12 @@ use glutin::event::ElementState;
 use glutin::event::KeyboardInput;
 use glutin::event::MouseButton;
 use glutin::event::MouseScrollDelta;
-#[derive(Debug)]
+
+use crate::sys::system::System;
+
+#[derive(Clone, Copy)]
 pub struct EventManager {
-    key: fn(key: KeyboardInput, device_id: DeviceId),
+    key: fn(system: &mut System, key: KeyboardInput, device_id: DeviceId),
     device_added: fn(device_id: DeviceId),
     device_removed: fn(device_id: DeviceId),
     mouse_motion: fn(delta: (f64, f64), device_id: DeviceId),
@@ -20,7 +23,7 @@ pub struct EventManager {
 }
 impl EventManager {
     pub fn new() -> Self {
-        fn key(_key: KeyboardInput, _device_id: DeviceId) {}
+        fn key(_system: &mut System, _key: KeyboardInput, _device_id: DeviceId) {}
         fn device_added(_device_id: DeviceId) {}
         fn device_removed(_device_id: DeviceId) {}
         fn mouse_motion(_delta: (f64, f64), _device_id: DeviceId) {}
@@ -45,11 +48,14 @@ impl EventManager {
             axis_motion,
         }
     }
-    pub fn set_key_callback(&mut self, callback: fn(key: KeyboardInput, device_id: DeviceId)) {
+    pub fn set_key_callback(
+        &mut self,
+        callback: fn(system: &mut System, key: KeyboardInput, device_id: DeviceId),
+    ) {
         self.key = callback;
     }
-    pub fn run_key_callback(&self, key: KeyboardInput, device_id: DeviceId) {
-        (self.key)(key, device_id);
+    pub fn run_key_callback(&self, system: &mut System, key: KeyboardInput, device_id: DeviceId) {
+        (self.key)(system, key, device_id);
     }
     pub fn set_device_added_callback(&mut self, callback: fn(device_id: DeviceId)) {
         self.device_added = callback;

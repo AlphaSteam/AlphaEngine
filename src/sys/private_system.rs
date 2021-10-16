@@ -20,8 +20,8 @@ pub struct PrivateSystem {
 }
 
 impl PrivateSystem {
-    pub fn new(game: Game, display: Display, event_manager: EventManager) -> PrivateSystem {
-        let system = System::new(display.clone(), event_manager);
+    pub fn new(game: Game, display: Display) -> PrivateSystem {
+        let system = System::new(display.clone());
         let private_system = PrivateSystem {
             game,
             renderer: Renderer::new(),
@@ -31,20 +31,20 @@ impl PrivateSystem {
 
         private_system
     }
-    pub fn start(&mut self) {
+    pub fn start(&mut self, event_manager: &mut EventManager) {
         let system = &mut self.system;
-        self.game.start(system);
+        self.game.start(system, event_manager);
         self.renderer.start(&self.display, system);
     }
 
-    pub fn update(&mut self, time_step: f32) {
+    pub fn update(&mut self, event_manager: &mut EventManager, time_step: f32) {
         let system = &mut self.system;
-        self.game.update(system, time_step);
+        self.game.update(system, event_manager, time_step);
         self.renderer.render(&self.display, system);
     }
-    pub fn stop(&mut self) {
+    pub fn stop(&mut self, event_manager: &mut EventManager) {
         let system = &mut self.system;
-        self.game.stop(system);
+        self.game.stop(system, event_manager);
         self.renderer.stop();
     }
     pub fn system(&self) -> &System {

@@ -5,11 +5,8 @@ use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
 use super::game_object::GameObject;
 pub use crate::game::Game;
+use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
-use crate::{
-    event::event_manager::EventManager,
-    text::{font::Font, render_text::Text},
-};
 use crate::{rendering::vertex::Vertex, shaders::Shader};
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
@@ -29,11 +26,10 @@ pub struct System {
     fonts: HashMap<String, Font>,
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
-    event_manager: EventManager,
 }
 
 impl System {
-    pub fn new(display: Display, event_manager: EventManager) -> Self {
+    pub fn new(display: Display) -> Self {
         let window_resolution = display.gl_window().window().inner_size();
         let projection = ProjectionOrtho::new(
             0.0,
@@ -54,7 +50,6 @@ impl System {
             fonts: HashMap::new(),
             text: Vec::new(),
             text_buffers: Vec::new(),
-            event_manager,
         }
     }
     pub fn game_objects(&self) -> &Vec<GameObject> {
@@ -174,12 +169,5 @@ impl System {
     ) {
         let text = Text::new(text, font, position, scale, rotation, color);
         self.text.push(text);
-    }
-
-    pub fn event_manager(&self) -> &EventManager {
-        &self.event_manager
-    }
-    pub fn event_manager_mut(&mut self) -> &mut EventManager {
-        &mut self.event_manager
     }
 }

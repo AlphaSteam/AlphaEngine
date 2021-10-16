@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 extern crate alpha_engine;
+use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
@@ -10,7 +11,7 @@ use sys::{
     game_object::GameObject, system::System,
 };
 use text::font::Font;
-fn start(system: &mut System) {
+fn start(system: &mut System, event_manager: &mut EventManager) {
     system.set_window_fullscreen(Fullscreen::False);
     system.set_window_resolution([600, 800]);
     system.set_window_maximized(true);
@@ -59,19 +60,24 @@ fn start(system: &mut System) {
     );
 
     system.add_game_object(sprite2);
-    let event_manager = system.event_manager_mut();
     event_manager.set_key_callback(process_inputs);
     event_manager.set_device_added_callback(device_added);
     event_manager.set_device_removed_callback(device_removed);
     event_manager.set_motion_callback(motion);
     event_manager.set_mouse_motion_callback(mouse_motion);
 }
-fn update(system: &mut System, _time_step: f32) {
+fn update(system: &mut System, event_manager: &mut EventManager, _time_step: f32) {
     let _window_size = system.get_window_resolution();
+    system
+        .game_objects_mut()
+        .first_mut()
+        .unwrap()
+        .transform_mut()
+        .translate([1.0, 0.0, 0.0])
 }
-fn stop(_system: &mut System) {}
+fn stop(_system: &mut System, event_manager: &mut EventManager) {}
 
-fn process_inputs(key: KeyboardInput, _device_id: DeviceId) {
+fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId) {
     let key_code = key.virtual_keycode;
     match key_code {
         None => println!("Key not recognized"),
@@ -79,6 +85,10 @@ fn process_inputs(key: KeyboardInput, _device_id: DeviceId) {
             VirtualKeyCode::D => match key.state {
                 alpha_engine::event::ElementState::Pressed => println!("D pressed"),
                 alpha_engine::event::ElementState::Released => println!("D released"),
+            },
+            VirtualKeyCode::P => match key.state {
+                alpha_engine::event::ElementState::Pressed => {}
+                _ => (),
             },
             _ => (),
         },
