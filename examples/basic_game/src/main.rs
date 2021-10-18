@@ -17,7 +17,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     system.set_window_maximized(true);
     system.set_current_shader(Shader::Basic);
 
-    system.add_font("Arial", "src/fonts/ArialCE.ttf");
+    /*    system.add_font("Arial", "src/fonts/ArialCE.ttf");
     system.render_text(
         "Test".to_string(),
         "Arial".to_string(),
@@ -25,7 +25,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
         [10.0, 10.0],
         0.0,
         [1.0, 1.0, 1.0],
-    );
+    ); */
     //let projection = ProjectionPerspective::new(0.6, 120.0, 0.0, 800.0);
     //system.camera_mut().set_projection(projection);
     //let window_resolution = system.get_window_resolution();
@@ -52,14 +52,14 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     //sprite.transform_mut().rotate(Axis::XAxis, 90.0);
     //sprite.transform_mut().rotate(Axis::YAxis, 90.0);
 
-    system.add_game_object(sprite);
+    system.add_game_object("Sprite 1".to_string(), sprite);
 
     let sprite2 = GameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
     );
 
-    system.add_game_object(sprite2);
+    system.add_game_object("Sprite 2".to_string(), sprite2);
     event_manager.set_key_callback(process_inputs);
     event_manager.set_device_added_callback(device_added);
     event_manager.set_device_removed_callback(device_removed);
@@ -67,13 +67,12 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     event_manager.set_mouse_motion_callback(mouse_motion);
 }
 fn update(system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {
-    let object_transform = system
-        .game_objects_mut()
-        .first_mut()
+    /* let object_transform = system
+        .get_game_object_mut("Sprite 2".to_string())
         .unwrap()
         .transform_mut();
 
-    object_transform.translate([1.0, 0.0, 0.0])
+    object_transform.translate([1.0, 0.0, 0.0]) */
 }
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 
@@ -84,13 +83,48 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
         Some(virtual_key) => match virtual_key {
             VirtualKeyCode::D => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
-                    println!("D pressed");
+                    /* system
+                    .camera_mut()
+                    .transform_mut()
+                    .translate([100.0, 0.0, 0.0]); */
                     system
-                        .camera_mut()
+                        .get_game_object_mut("Sprite 2".to_string())
+                        .unwrap()
                         .transform_mut()
                         .translate([100.0, 0.0, 0.0]);
                 }
-                alpha_engine::event::ElementState::Released => println!("D released"),
+                alpha_engine::event::ElementState::Released => (),
+            },
+            VirtualKeyCode::A => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    system
+                        .get_game_object_mut("Sprite 2".to_string())
+                        .unwrap()
+                        .transform_mut()
+                        .translate([-100.0, 0.0, 0.0]);
+                }
+                alpha_engine::event::ElementState::Released => (),
+            },
+
+            VirtualKeyCode::S => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    system
+                        .get_game_object_mut("Sprite 2".to_string())
+                        .unwrap()
+                        .transform_mut()
+                        .translate([0.0, -100.0, 0.0]);
+                }
+                alpha_engine::event::ElementState::Released => (),
+            },
+            VirtualKeyCode::W => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    system
+                        .get_game_object_mut("Sprite 2".to_string())
+                        .unwrap()
+                        .transform_mut()
+                        .translate([0.0, 100.0, 0.0]);
+                }
+                alpha_engine::event::ElementState::Released => (),
             },
             VirtualKeyCode::P => match key.state {
                 alpha_engine::event::ElementState::Pressed => system.set_framerate_target(1),

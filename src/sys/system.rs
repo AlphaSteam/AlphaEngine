@@ -16,10 +16,10 @@ Struct that hosts the engine functions
 
 */
 pub struct System {
-    game_objects: Vec<GameObject>,
-    vertex_buffers: Vec<VertexBuffer<Vertex>>,
-    index_buffers: Vec<IndexBuffer<u32>>,
-    textures: Vec<glium::texture::SrgbTexture2d>,
+    game_objects: HashMap<String, GameObject>,
+    vertex_buffers: HashMap<String, VertexBuffer<Vertex>>,
+    index_buffers: HashMap<String, IndexBuffer<u32>>,
+    textures: HashMap<String, glium::texture::SrgbTexture2d>,
     camera: Camera,
     display: Display,
     current_shader: Shader,
@@ -41,10 +41,10 @@ impl System {
             10.0,
         );
         Self {
-            game_objects: Vec::new(),
-            vertex_buffers: Vec::new(),
-            index_buffers: Vec::new(),
-            textures: Vec::new(),
+            game_objects: HashMap::new(),
+            vertex_buffers: HashMap::new(),
+            index_buffers: HashMap::new(),
+            textures: HashMap::new(),
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
             display,
             current_shader: Shader::Basic,
@@ -54,51 +54,71 @@ impl System {
             frame_time_target_nanos: 16_666_667,
         }
     }
-    pub fn game_objects(&self) -> &Vec<GameObject> {
+    pub fn game_objects(&self) -> &HashMap<String, GameObject> {
         &self.game_objects
     }
 
-    pub fn game_objects_mut(&mut self) -> &mut Vec<GameObject> {
+    pub fn game_objects_mut(&mut self) -> &mut HashMap<String, GameObject> {
         &mut self.game_objects
     }
 
-    pub fn add_game_object(&mut self, game_object: GameObject) {
-        self.game_objects_mut().push(game_object)
+    pub fn get_game_object_mut(&mut self, game_object_id: String) -> Option<&mut GameObject> {
+        let entry = self.game_objects.entry(game_object_id);
+        match entry {
+            std::collections::hash_map::Entry::Occupied(object) => Some(object.into_mut()),
+            std::collections::hash_map::Entry::Vacant(_) => None,
+        }
+    }
+    pub fn add_game_object(&mut self, game_object_id: String, game_object: GameObject) {
+        let game_objects = self.game_objects_mut();
+        game_objects.entry(game_object_id).or_insert(game_object);
+    }
+    pub fn remove_game_object(&mut self, game_object_id: String) -> Option<GameObject> {
+        let game_objects = self.game_objects_mut();
+        game_objects.remove(&game_object_id)
     }
 
-    pub fn vertex_buffers(&self) -> &Vec<VertexBuffer<Vertex>> {
+    pub fn vertex_buffers(&self) -> &HashMap<String, VertexBuffer<Vertex>> {
         &self.vertex_buffers
     }
 
-    pub fn vertex_buffers_mut(&mut self) -> &mut Vec<VertexBuffer<Vertex>> {
+    pub fn vertex_buffers_mut(&mut self) -> &mut HashMap<String, VertexBuffer<Vertex>> {
         &mut self.vertex_buffers
     }
-    pub fn add_vertex_buffer(&mut self, vertex_buffer: VertexBuffer<Vertex>) {
-        self.vertex_buffers_mut().push(vertex_buffer)
+    pub fn add_vertex_buffer(
+        &mut self,
+        game_object_id: String,
+        vertex_buffer: VertexBuffer<Vertex>,
+    ) {
+        self.vertex_buffers_mut()
+            .entry(game_object_id)
+            .or_insert(vertex_buffer);
     }
 
-    pub fn index_buffers(&self) -> &Vec<IndexBuffer<u32>> {
+    pub fn index_buffers(&self) -> &HashMap<String, IndexBuffer<u32>> {
         &self.index_buffers
     }
 
-    pub fn index_buffers_mut(&mut self) -> &mut Vec<IndexBuffer<u32>> {
+    pub fn index_buffers_mut(&mut self) -> &mut HashMap<String, IndexBuffer<u32>> {
         &mut self.index_buffers
     }
 
-    pub fn add_index_buffer(&mut self, index_buffer: IndexBuffer<u32>) {
-        self.index_buffers_mut().push(index_buffer)
+    pub fn add_index_buffer(&mut self, game_object_id: String, index_buffer: IndexBuffer<u32>) {
+        self.index_buffers_mut()
+            .entry(game_object_id)
+            .or_insert(index_buffer);
     }
 
-    pub fn textures(&self) -> &Vec<glium::texture::SrgbTexture2d> {
+    pub fn textures(&self) -> &HashMap<String, glium::texture::SrgbTexture2d> {
         &self.textures
     }
 
-    pub fn textures_mut(&mut self) -> &mut Vec<glium::texture::SrgbTexture2d> {
+    pub fn textures_mut(&mut self) -> &mut HashMap<String, glium::texture::SrgbTexture2d> {
         &mut self.textures
     }
 
-    pub fn add_texture(&mut self, texture: glium::texture::SrgbTexture2d) {
-        self.textures_mut().push(texture)
+    pub fn add_texture(&mut self, game_object_id: String, texture: glium::texture::SrgbTexture2d) {
+        self.textures_mut().entry(game_object_id).or_insert(texture);
     }
     pub fn camera(&self) -> &Camera {
         &self.camera

@@ -19,10 +19,10 @@ impl Renderer {
     }
     pub fn start(&self, display: &Display, system: &mut System) {
         let game_objects = system.game_objects_mut().clone();
-        for game_object in game_objects {
+        for (game_object_id, game_object) in game_objects {
             let shape = game_object.mesh().vertices();
             let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
-            system.add_vertex_buffer(vertex_buffer);
+            system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
 
             let indices = game_object.mesh().indices();
             let index_buffer = glium::IndexBuffer::new(
@@ -31,7 +31,7 @@ impl Renderer {
                 &indices,
             )
             .unwrap();
-            system.add_index_buffer(index_buffer);
+            system.add_index_buffer(game_object_id.clone(), index_buffer);
 
             let image = game_object.texture();
             let image_dimensions = image.dimensions();
@@ -41,7 +41,7 @@ impl Renderer {
                 image_dimensions,
             );
             let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
-            system.add_texture(texture);
+            system.add_texture(game_object_id, texture);
         }
         let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
 
@@ -115,13 +115,12 @@ impl Renderer {
         let projection = *system.camera().projection().get_projection().as_ref();
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
-        for n in 0..system.game_objects().len() {
-            let game_object = &system.game_objects()[n];
+        for (game_object_id, game_object) in system.game_objects().iter() {
             let model = *game_object.transform().get_model_matrix().as_ref();
 
-            let vertex_buffer = &system.vertex_buffers()[n];
-            let index_buffer = &system.index_buffers()[n];
-            let diffuse_texture = &system.textures()[n];
+            let vertex_buffer = &system.vertex_buffers()[game_object_id];
+            let index_buffer = &system.index_buffers()[game_object_id];
+            let diffuse_texture = &system.textures()[game_object_id];
 
             target
                 .draw(

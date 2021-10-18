@@ -6,6 +6,7 @@
     "freetype",
     "fullscreen",
     "glium",
+    "glutin",
     "Grayscale",
     "mult",
     "nalgebra",
