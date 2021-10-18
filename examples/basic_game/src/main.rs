@@ -65,8 +65,13 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     event_manager.set_device_removed_callback(device_removed);
     event_manager.set_motion_callback(motion);
     event_manager.set_mouse_motion_callback(mouse_motion);
+
+    let sprite3 =
+        GameObject::game_object_from_sprite([1300.0, 200.0, 0.0], "NOT EXISTENT.png".to_string());
+    system.add_game_object("Sprite 3".to_string(), sprite3);
+    event_manager.set_key_callback(process_inputs);
 }
-fn update(system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {
+fn update(_system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {
     /* let object_transform = system
         .get_game_object_mut("Sprite 2".to_string())
         .unwrap()

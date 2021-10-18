@@ -1,4 +1,5 @@
 extern crate glium;
+
 pub use crate::rendering::vertex::Vertex;
 pub use crate::window::Window;
 use crate::{
@@ -35,12 +36,20 @@ impl Renderer {
 
             let image = game_object.texture();
             let image_dimensions = image.dimensions();
-
-            let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
-                &image.to_bytes(),
+            println!("ASDa: {:?}", image_dimensions);
+            let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
+                &image.clone().into_bytes(),
                 image_dimensions,
             );
-            let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
+
+            let texture = glium::texture::SrgbTexture2d::new(display, image_raw);
+            let texture = match texture {
+                Ok(texture) => texture,
+                Err(error) => {
+                    println!("aaaaaaaaa: {}", error);
+                    panic!()
+                }
+            };
             system.add_texture(game_object_id, texture);
         }
         let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();

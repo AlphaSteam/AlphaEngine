@@ -1,7 +1,9 @@
-use image::{DynamicImage, GenericImageView};
+use std::io::Cursor;
 
 pub use crate::rendering::mesh::Mesh;
 pub use crate::sys::transform::Transform;
+use image::io::Reader as ImageReader;
+use image::{DynamicImage, GenericImageView, ImageFormat};
 
 /**
 Struct that represents an object of the game.
@@ -20,16 +22,27 @@ impl GameObject {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
         let scale_vec3 = glm::vec3(size[0], size[1], size[2]);
         let transform = Transform::new(position_vec3, scale_vec3);
-        let texture = image::open(texture_path.clone());
+        let texture = ImageReader::open(texture_path.clone());
         let texture = match texture {
-            Ok(texture) => texture,
-            Err(_) => image::open("../assets/sprites/default.png").unwrap(),
-        };
+            Ok(texture) => match texture.decode() {
+                Ok(image) => image,
+                Err(_) => image::load(
+                    Cursor::new(&include_bytes!("../assets/sprites/default.png")),
+                    ImageFormat::Png,
+                )
+                .unwrap(),
+            },
 
+            Err(_) => image::load(
+                Cursor::new(&include_bytes!("../assets/sprites/default.png")),
+                ImageFormat::Png,
+            )
+            .unwrap(),
+        };
         let game_object = Self {
             transform,
             mesh,
-            texture,
+            texture: texture,
         };
 
         game_object
@@ -40,11 +53,13 @@ impl GameObject {
         let texture = image::open(texture_path.clone());
         let texture = match texture {
             Ok(texture) => texture,
-            Err(_) => image::open("../assets/sprites/default.png").unwrap(),
+            Err(_) => {
+                image::load_from_memory(include_bytes!("../assets/sprites/default.png")).unwrap()
+            }
         };
         let texture_w = texture.width() as f32;
         let texture_h = texture.height() as f32;
-
+        println!("{},{}", texture_w, texture_h);
         GameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
     }
 
