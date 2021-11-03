@@ -46,12 +46,12 @@ impl System {
             index_buffers: HashMap::new(),
             textures: HashMap::new(),
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
-            display,
+            display: display.clone(),
             current_shader: Shader::Basic,
             fonts: HashMap::new(),
             text: Vec::new(),
             text_buffers: Vec::new(),
-            frame_time_target_nanos: 16_666_667,
+            frame_time_target_nanos: (1_000_000_000 / 60),
         }
     }
     pub fn game_objects(&self) -> &HashMap<String, GameObject> {
@@ -192,9 +192,10 @@ impl System {
         let text = Text::new(text, font, position, scale, rotation, color);
         self.text.push(text);
     }
-    pub fn set_framerate_target(&mut self, framerate: u64) {
-        let nanos = 1 / framerate;
-        self.frame_time_target_nanos = nanos * 1000000000
+    pub fn set_framerate_target(&mut self, framerate: f32) {
+        let seconds = 1.0 / framerate;
+        let nano_seconds = seconds * 1_000_000_000.0;
+        self.frame_time_target_nanos = nano_seconds as u64
     }
     pub fn frame_time_target_nanos(&self) -> u64 {
         self.frame_time_target_nanos

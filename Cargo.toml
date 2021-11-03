@@ -16,4 +16,5 @@ nalgebra-glm = "*"
 image = "*"
 relative-path = "1.5.0"
 ab_glyph = "0.2.11"
-
+egui="*"
+egui_glium = "0.14.0"

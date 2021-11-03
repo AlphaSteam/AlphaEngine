@@ -59,7 +59,6 @@ impl GameObject {
         };
         let texture_w = texture.width() as f32;
         let texture_h = texture.height() as f32;
-        println!("{},{}", texture_w, texture_h);
         GameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
     }
 

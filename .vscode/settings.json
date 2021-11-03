@@ -3,6 +3,7 @@
     "backface",
     "Borderless",
     "codepoint",
+    "Egui",
     "freetype",
     "fullscreen",
     "glium",

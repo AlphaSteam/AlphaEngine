@@ -69,6 +69,10 @@ impl Transform {
         self.local_position = self.local_position + position_vec3;
     }
 
+    pub fn set_local_position(&mut self, position: [f32; 3]) {
+        self.local_position = glm::vec3(position[0], position[1], position[2]);
+    }
+
     /**
     Inmutable local rotation.
 

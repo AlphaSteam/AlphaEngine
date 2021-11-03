@@ -1,14 +1,10 @@
 extern crate glium;
 
 pub use crate::rendering::vertex::Vertex;
+use crate::sys::system::System;
 pub use crate::window::Window;
-use crate::{
-    shaders::Shader,
-    sys::{
-        cam::{projection::Projection, projection_ortho::ProjectionOrtho},
-        system::System,
-    },
-};
+use egui::epaint::ClippedShape;
+use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface, VertexBuffer};
 use image::GenericImageView;
 
@@ -36,20 +32,12 @@ impl Renderer {
 
             let image = game_object.texture();
             let image_dimensions = image.dimensions();
-            println!("ASDa: {:?}", image_dimensions);
             let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
                 &image.clone().into_bytes(),
                 image_dimensions,
             );
 
-            let texture = glium::texture::SrgbTexture2d::new(display, image_raw);
-            let texture = match texture {
-                Ok(texture) => texture,
-                Err(error) => {
-                    println!("aaaaaaaaa: {}", error);
-                    panic!()
-                }
-            };
+            let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
             system.add_texture(game_object_id, texture);
         }
         let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
@@ -97,7 +85,29 @@ impl Renderer {
             system.add_text_buffer(text_buffer.0, text_buffer.1);
         }
     }
-    pub fn render(&self, display: &Display, system: &mut System) {
+    pub fn render_gui(
+        display: &Display,
+        egui: &mut EguiGlium,
+        time_step: f32,
+    ) -> (bool, Vec<ClippedShape>) {
+        egui.begin_frame(&display);
+        let fps = 1.0 / (time_step as f32 / 1_000_000_000.0);
+        //println!("Fps: {}", fps);
+        egui::SidePanel::left("my_side_panel").show(egui.ctx(), |ui| {
+            ui.label(format!("Fps: {}", fps));
+        });
+
+        let (needs_repaint, shapes) = egui.end_frame(&display);
+        return (needs_repaint, shapes);
+    }
+    pub fn render(
+        &self,
+        display: &Display,
+        egui: &mut EguiGlium,
+        system: &mut System,
+        time_step: f32,
+    ) {
+        let (_needs_repaint, shapes) = Self::render_gui(display, egui, time_step);
         let mut target = display.draw();
 
         let program = glium::Program::from_source(
@@ -110,11 +120,11 @@ impl Renderer {
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         let params = glium::DrawParameters {
             // GO BACK TO THIS
-            /*depth: glium::Depth {
+            depth: glium::Depth {
                 test: glium::draw_parameters::DepthTest::Overwrite,
                 write: true,
                 ..Default::default()
-            },*/
+            },
             blend: Blend::alpha_blending(),
             backface_culling: BackfaceCullingMode::CullClockwise,
             ..Default::default()
@@ -141,9 +151,9 @@ impl Renderer {
                 )
                 .unwrap();
         }
-
+        egui.paint(&display, &mut target, shapes);
         // Draw text
-        let program = glium::Program::from_source(
+        /* let program = glium::Program::from_source(
             display,
             Shader::Text.source_code().0.as_str(),
             Shader::Text.source_code().1.as_str(),
@@ -186,7 +196,7 @@ impl Renderer {
                     &params,
                 )
                 .unwrap();
-        }
+        } */
         target.finish().unwrap();
     }
     pub fn stop(&self) {}

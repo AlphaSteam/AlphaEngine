@@ -71,13 +71,17 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     system.add_game_object("Sprite 3".to_string(), sprite3);
     event_manager.set_key_callback(process_inputs);
 }
-fn update(_system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {
-    /* let object_transform = system
+fn update(system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {
+    let window_res = system.get_window_resolution();
+    let object_transform = system
         .get_game_object_mut("Sprite 2".to_string())
         .unwrap()
         .transform_mut();
-
-    object_transform.translate([1.0, 0.0, 0.0]) */
+    if object_transform.local_position()[0] < window_res[0] {
+        object_transform.translate([1.0, 0.0, 0.0])
+    } else {
+        object_transform.set_local_position([-1.0, 0.0, 0.0]);
+    }
 }
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 
@@ -132,8 +136,8 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 alpha_engine::event::ElementState::Released => (),
             },
             VirtualKeyCode::P => match key.state {
-                alpha_engine::event::ElementState::Pressed => system.set_framerate_target(1),
-                alpha_engine::event::ElementState::Released => system.set_framerate_target(60),
+                alpha_engine::event::ElementState::Pressed => system.set_framerate_target(1.0),
+                alpha_engine::event::ElementState::Released => system.set_framerate_target(60.0),
             },
             _ => (),
         },
