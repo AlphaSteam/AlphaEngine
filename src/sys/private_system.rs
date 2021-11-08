@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use egui_glium::EguiGlium;
 use glium::Display;
 
@@ -37,13 +39,17 @@ impl PrivateSystem {
         self.game.start(system, event_manager);
         self.renderer.start(&self.display, system);
     }
-    pub fn render(&mut self, egui: &mut EguiGlium, time_step: f32) {
+
+    pub fn update(
+        &mut self,
+        egui: &mut EguiGlium,
+        event_manager: &mut EventManager,
+        old_render: &mut Instant,
+    ) {
         let system = &mut self.system;
-        self.renderer.render(&self.display, egui, system, time_step);
-    }
-    pub fn update(&mut self, event_manager: &mut EventManager, time_step: f32) {
-        let system = &mut self.system;
-        self.game.update(system, event_manager, time_step);
+        self.game.update(system, event_manager, 0.0);
+        self.renderer
+            .render(&self.display, egui, system, old_render);
     }
     pub fn stop(&mut self, event_manager: &mut EventManager) {
         let system = &mut self.system;

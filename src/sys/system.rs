@@ -200,4 +200,7 @@ impl System {
     pub fn frame_time_target_nanos(&self) -> u64 {
         self.frame_time_target_nanos
     }
+    pub fn framerate_target(&self) -> f32 {
+        1.0 / (self.frame_time_target_nanos as f32 / 1_000_000_000.0)
+    }
 }

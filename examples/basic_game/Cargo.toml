@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 alpha_engine = {  path = "../.." }
+glium = "0.30.1"

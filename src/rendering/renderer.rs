@@ -1,5 +1,7 @@
 extern crate glium;
 
+use std::time::Instant;
+
 pub use crate::rendering::vertex::Vertex;
 use crate::sys::system::System;
 pub use crate::window::Window;
@@ -8,11 +10,17 @@ use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface, VertexBuffer};
 use image::GenericImageView;
 
-pub struct Renderer {}
+pub struct Renderer {
+    last_fps: [f32; 20],
+    fps_index: usize,
+}
 
 impl Renderer {
     pub fn new() -> Renderer {
-        Renderer {}
+        Renderer {
+            last_fps: [0.0; 20],
+            fps_index: 0,
+        }
     }
     pub fn start(&self, display: &Display, system: &mut System) {
         let game_objects = system.game_objects_mut().clone();
@@ -91,9 +99,8 @@ impl Renderer {
         time_step: f32,
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(&display);
-        let fps = 1.0 / (time_step as f32 / 1_000_000_000.0);
-        //println!("Fps: {}", fps);
-        egui::SidePanel::left("my_side_panel").show(egui.ctx(), |ui| {
+        let fps = (1.0 / (time_step / 1_000_000_000.0)).round();
+        egui::Window::new("Debug").show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
         });
 
@@ -101,13 +108,21 @@ impl Renderer {
         return (needs_repaint, shapes);
     }
     pub fn render(
-        &self,
+        &mut self,
         display: &Display,
         egui: &mut EguiGlium,
         system: &mut System,
-        time_step: f32,
+        old_render: &mut Instant,
     ) {
-        let (_needs_repaint, shapes) = Self::render_gui(display, egui, time_step);
+        let time_since_render = Instant::now().duration_since(*old_render);
+        self.last_fps[self.fps_index] = time_since_render.as_nanos() as f32;
+        if self.fps_index < 19 {
+            self.fps_index += 1;
+        } else {
+            self.fps_index = 0;
+        }
+        let fps = self.last_fps.iter().sum::<f32>() / 20.0;
+        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps);
         let mut target = display.draw();
 
         let program = glium::Program::from_source(
@@ -198,6 +213,7 @@ impl Renderer {
                 .unwrap();
         } */
         target.finish().unwrap();
+        //*old_render = Instant::now();
     }
     pub fn stop(&self) {}
 }

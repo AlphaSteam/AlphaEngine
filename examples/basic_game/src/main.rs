@@ -122,6 +122,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                         .unwrap()
                         .transform_mut()
                         .translate([0.0, -100.0, 0.0]);
+                    system.set_framerate_target(system.framerate_target() - 1.0)
                 }
                 alpha_engine::event::ElementState::Released => (),
             },
@@ -132,6 +133,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                         .unwrap()
                         .transform_mut()
                         .translate([0.0, 100.0, 0.0]);
+                    system.set_framerate_target(system.framerate_target() + 1.0)
                 }
                 alpha_engine::event::ElementState::Released => (),
             },

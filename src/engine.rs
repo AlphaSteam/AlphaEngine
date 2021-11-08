@@ -34,16 +34,16 @@ impl Engine {
         let mut event_manager = self.event_manager.clone();
         let display = private_system.display().clone();
         let mut egui = egui_glium::EguiGlium::new(&display);
-
+        let mut old_render = Instant::now();
+        let mut old_frame = Instant::now();
+        let mut remaining_time = private_system.system().frame_time_target_nanos();
         self.event_loop.run(move |ev, _, control_flow| {
-            let next_frame_time = Instant::now()
-                + Duration::from_nanos(private_system.system().frame_time_target_nanos());
+            let now = Instant::now();
 
-            let next_frame_time_f32 = Instant::now().elapsed().as_nanos() as f32
-                + Duration::from_nanos(private_system.system().frame_time_target_nanos()).as_nanos()
-                    as f32;
+            //private_system.system().frame_time_target_nanos()
+            let next_frame_time = now + Duration::from_nanos(remaining_time);
+
             *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
-
             match ev {
                 glutin::event::Event::WindowEvent { event, .. } => match event {
                     glutin::event::WindowEvent::CloseRequested => {
@@ -79,7 +79,7 @@ impl Engine {
                     _ => {
                         egui.on_event(&event);
 
-                        //display.gl_window().window().request_redraw();
+                        display.gl_window().window().request_redraw();
                     }
                 },
                 glutin::event::Event::DeviceEvent {
@@ -112,27 +112,26 @@ impl Engine {
                         device_id,
                     ),
                 },
-                glutin::event::Event::NewEvents(start_cause) => {
-                    match start_cause {
-                        glutin::event::StartCause::ResumeTimeReached { .. } => {
-                            private_system.render(&mut egui, next_frame_time_f32);
-                        }
-                        glutin::event::StartCause::Poll { .. } => {
-                            private_system.render(&mut egui, next_frame_time_f32);
-                        }
-                        _ => (),
-                    }
 
-                    //display.gl_window().window().request_redraw();
-                }
                 glutin::event::Event::MainEventsCleared => {
-                    //private_system.render(&mut egui, next_frame_time_f32);
-                    //display.gl_window().window().request_redraw();
-                    private_system.update(&mut event_manager, next_frame_time_f32);
+                    let now = Instant::now();
+
+                    let time = now.duration_since(old_frame);
+
+                    if time.as_nanos() as u64 >= remaining_time {
+                        private_system.update(&mut egui, &mut event_manager, &mut old_render);
+                        old_render = now;
+                        let extra_time = time.as_nanos() as u64 - remaining_time;
+                        if extra_time < private_system.system().frame_time_target_nanos() {
+                            remaining_time =
+                                private_system.system().frame_time_target_nanos() - extra_time;
+                        }
+                    } else {
+                        remaining_time -= time.as_nanos() as u64;
+                    }
+                    old_frame = now;
                 }
-                glutin::event::Event::RedrawRequested(_) if !cfg!(windows) => {
-                    private_system.render(&mut egui, next_frame_time_f32);
-                }
+
                 _ => (),
             }
         });
