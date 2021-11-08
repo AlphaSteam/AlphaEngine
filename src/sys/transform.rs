@@ -11,6 +11,7 @@ pub struct Transform {
     local_position: Vec3,
     local_rotation: Quat,
     local_scale: Vec3,
+    delta_time: f32,
 }
 
 impl Transform {
@@ -21,14 +22,15 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0));
+
      ```
     */
-    pub fn new(position: Vec3, scale: Vec3) -> Self {
+    pub fn new(position: Vec3, scale: Vec3, delta_time: f32) -> Self {
         let component = Self {
             local_position: position,
             local_rotation: glm::quat_identity(),
             local_scale: scale,
+            delta_time,
         };
 
         component
@@ -41,7 +43,6 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
      ```
     */
     pub fn local_position(&self) -> &Vec3 {
@@ -55,9 +56,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    let mut local_position_mut = transform.local_position_mut();
-    *local_position_mut = glm::vec3(0.0, 0.0, 0.0);
+
      ```
     */
     pub fn local_position_mut(&mut self) -> &mut Vec3 {
@@ -66,7 +65,8 @@ impl Transform {
 
     pub fn translate(&mut self, position: [f32; 3]) {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
-        self.local_position = self.local_position + position_vec3;
+        println!("Delta: {}", self.delta_time);
+        self.local_position = self.local_position + position_vec3 * self.delta_time;
     }
 
     pub fn set_local_position(&mut self, position: [f32; 3]) {
@@ -80,8 +80,6 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::quat(0.0, 2.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    assert_eq!(*transform.local_rotation(), glm::quat(0.0, 2.0, 0.0, 0.0));
      ```
     */
     pub fn local_rotation(&self) -> &Quat {
@@ -95,10 +93,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    let mut local_rotation_mut = transform.local_rotation_mut();
-    *local_rotation_mut = glm::quat(1.0, 1.0, 1.0, 1.0);
-    assert_eq!(*transform.local_rotation(), glm::quat(1.0, 1.0, 1.0, 1.0));
+
      ```
     */
     pub fn local_rotation_mut(&mut self) -> &mut Quat {
@@ -122,8 +117,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    assert_eq!(*transform.local_scale(), glm::vec3(2.0, 0.0, 0.0));
+
      ```
     */
     pub fn local_scale(&self) -> &Vec3 {
@@ -137,9 +131,7 @@ impl Transform {
      ```
     # pub use alpha_engine::sys::transform::Transform;
     # use nalgebra_glm as glm;
-    let mut transform = Transform::new(glm::vec3(1.0, 0.0, 0.0), glm::vec3(2.0, 0.0, 0.0));
-    let mut local_scale_mut = transform.local_scale_mut();
-    *local_scale_mut = glm::vec3(0.0, 1.0, 1.0);
+
      ```
     */
     pub fn local_scale_mut(&mut self) -> &mut Vec3 {

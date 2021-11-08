@@ -96,10 +96,10 @@ impl Renderer {
     pub fn render_gui(
         display: &Display,
         egui: &mut EguiGlium,
-        time_step: f32,
+        fps: f32,
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(&display);
-        let fps = (1.0 / (time_step / 1_000_000_000.0)).round();
+
         egui::Window::new("Debug").show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
         });
@@ -122,6 +122,9 @@ impl Renderer {
             self.fps_index = 0;
         }
         let fps = self.last_fps.iter().sum::<f32>() / 20.0;
+        let fps = (1.0 / (fps / 1_000_000_000.0)).round();
+        system.current_delta_time = 1.0 / fps;
+
         let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps);
         let mut target = display.draw();
 
@@ -213,7 +216,6 @@ impl Renderer {
                 .unwrap();
         } */
         target.finish().unwrap();
-        //*old_render = Instant::now();
     }
     pub fn stop(&self) {}
 }

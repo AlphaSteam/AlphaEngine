@@ -47,7 +47,7 @@ impl PrivateSystem {
         old_render: &mut Instant,
     ) {
         let system = &mut self.system;
-        self.game.update(system, event_manager, 0.0);
+        self.game.update(system, event_manager);
         self.renderer
             .render(&self.display, egui, system, old_render);
     }

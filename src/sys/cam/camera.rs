@@ -11,7 +11,7 @@ impl Camera {
     pub fn new(position: [f32; 3], look_at: [f32; 3], projection: Box<dyn Projection>) -> Self {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
 
-        let mut transform = Transform::new(position_vec3, glm::vec3(1.0, 1.0, 1.0));
+        let mut transform = Transform::new(position_vec3, glm::vec3(1.0, 1.0, 1.0), 0.0);
         let local_rotation = transform.local_rotation_mut();
 
         let look_at_vec3 = glm::vec3(look_at[0], look_at[1], look_at[2]);

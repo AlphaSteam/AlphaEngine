@@ -15,6 +15,7 @@ Struct that hosts the engine functions
 
 
 */
+#[derive(Debug)]
 pub struct System {
     game_objects: HashMap<String, GameObject>,
     vertex_buffers: HashMap<String, VertexBuffer<Vertex>>,
@@ -27,6 +28,7 @@ pub struct System {
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
+    pub current_delta_time: f32,
 }
 
 impl System {
@@ -52,6 +54,7 @@ impl System {
             text: Vec::new(),
             text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
+            current_delta_time: 1.0,
         }
     }
     pub fn game_objects(&self) -> &HashMap<String, GameObject> {
@@ -69,9 +72,16 @@ impl System {
             std::collections::hash_map::Entry::Vacant(_) => None,
         }
     }
-    pub fn add_game_object(&mut self, game_object_id: String, game_object: GameObject) {
+    pub fn add_game_object(
+        &mut self,
+        game_object_id: String,
+        game_object: GameObject,
+    ) -> GameObject {
         let game_objects = self.game_objects_mut();
-        game_objects.entry(game_object_id).or_insert(game_object);
+        game_objects
+            .entry(game_object_id)
+            .or_insert(game_object.clone());
+        game_object
     }
     pub fn remove_game_object(&mut self, game_object_id: String) -> Option<GameObject> {
         let game_objects = self.game_objects_mut();
@@ -202,5 +212,11 @@ impl System {
     }
     pub fn framerate_target(&self) -> f32 {
         1.0 / (self.frame_time_target_nanos as f32 / 1_000_000_000.0)
+    }
+    pub fn set_current_delta_time(&mut self, delta_time: f32) {
+        self.current_delta_time = delta_time;
+    }
+    pub fn current_delta_time(&self) -> &f32 {
+        &self.current_delta_time
     }
 }
