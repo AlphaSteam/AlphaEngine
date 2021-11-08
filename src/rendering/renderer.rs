@@ -122,7 +122,7 @@ impl Renderer {
             self.fps_index = 0;
         }
         let fps = self.last_fps.iter().sum::<f32>() / 20.0;
-        let fps = (1.0 / ((fps + 0.0001) / 1_000_000_000.0)).round();
+        let fps = (1.0 / (fps / 1_000_000_000.0)).round();
         for (_game_object_id, game_object) in system.game_objects_mut().iter_mut() {
             game_object.transform_mut().delta_time = 1.0 / fps;
         }
