@@ -11,7 +11,7 @@ pub struct Transform {
     local_position: Vec3,
     local_rotation: Quat,
     local_scale: Vec3,
-    delta_time: f32,
+    pub delta_time: f32,
 }
 
 impl Transform {
@@ -25,12 +25,12 @@ impl Transform {
 
      ```
     */
-    pub fn new(position: Vec3, scale: Vec3, delta_time: f32) -> Self {
+    pub fn new(position: Vec3, scale: Vec3) -> Self {
         let component = Self {
             local_position: position,
             local_rotation: glm::quat_identity(),
             local_scale: scale,
-            delta_time,
+            delta_time: 0.0,
         };
 
         component
@@ -65,7 +65,6 @@ impl Transform {
 
     pub fn translate(&mut self, position: [f32; 3]) {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
-        println!("Delta: {}", self.delta_time);
         self.local_position = self.local_position + position_vec3 * self.delta_time;
     }
 

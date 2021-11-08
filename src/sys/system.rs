@@ -28,7 +28,6 @@ pub struct System {
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
-    pub current_delta_time: f32,
 }
 
 impl System {
@@ -54,7 +53,6 @@ impl System {
             text: Vec::new(),
             text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
-            current_delta_time: 1.0,
         }
     }
     pub fn game_objects(&self) -> &HashMap<String, GameObject> {
@@ -203,7 +201,7 @@ impl System {
         self.text.push(text);
     }
     pub fn set_framerate_target(&mut self, framerate: f32) {
-        let seconds = 1.0 / framerate;
+        let seconds = 1.0 / (framerate + 0.0001);
         let nano_seconds = seconds * 1_000_000_000.0;
         self.frame_time_target_nanos = nano_seconds as u64
     }
@@ -211,12 +209,6 @@ impl System {
         self.frame_time_target_nanos
     }
     pub fn framerate_target(&self) -> f32 {
-        1.0 / (self.frame_time_target_nanos as f32 / 1_000_000_000.0)
-    }
-    pub fn set_current_delta_time(&mut self, delta_time: f32) {
-        self.current_delta_time = delta_time;
-    }
-    pub fn current_delta_time(&self) -> &f32 {
-        &self.current_delta_time
+        1.0 / ((self.frame_time_target_nanos as f32 / 1_000_000_000.0) + 0.0001)
     }
 }

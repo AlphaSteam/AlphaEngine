@@ -122,9 +122,10 @@ impl Renderer {
             self.fps_index = 0;
         }
         let fps = self.last_fps.iter().sum::<f32>() / 20.0;
-        let fps = (1.0 / (fps / 1_000_000_000.0)).round();
-        system.current_delta_time = 1.0 / fps;
-
+        let fps = (1.0 / ((fps + 0.0001) / 1_000_000_000.0)).round();
+        for (_game_object_id, game_object) in system.game_objects_mut().iter_mut() {
+            game_object.transform_mut().delta_time = 1.0 / fps;
+        }
         let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps);
         let mut target = display.draw();
 
@@ -152,6 +153,7 @@ impl Renderer {
         let projection = *system.camera().projection().get_projection().as_ref();
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
+
         for (game_object_id, game_object) in system.game_objects().iter() {
             let model = *game_object.transform().get_model_matrix().as_ref();
 
