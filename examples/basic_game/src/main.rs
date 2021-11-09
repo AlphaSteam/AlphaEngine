@@ -47,7 +47,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
     );
-    sprite.transform_mut().scale([1.0, 1.5, 1.0]);
+    sprite.transform_mut().set_local_scale([1.0, 1.5, 1.0]);
     sprite.transform_mut().rotate(Axis::ZAxis, -90.0);
     //sprite.transform_mut().rotate(Axis::XAxis, 90.0);
     //sprite.transform_mut().rotate(Axis::YAxis, 90.0);
@@ -58,7 +58,6 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
     );
-
     system.add_game_object("Sprite 2".to_string(), sprite2);
     event_manager.set_key_callback(process_inputs);
     event_manager.set_device_added_callback(device_added);
@@ -78,10 +77,14 @@ fn update(system: &mut System, _event_manager: &mut EventManager) {
         .unwrap()
         .transform_mut();
     if object_transform.local_position()[0] < window_res[0] {
-        object_transform.translate([1000.0, 0.0, 0.0])
+        object_transform.translate([1000.0, 0.0, 0.0]);
+        object_transform.scale([2.0, 0.5, 1.0]);
     } else {
-        object_transform.set_local_position([-1.0, 0.0, 0.0]);
+        object_transform.set_local_position([-1.0, 1.0, 1.0]);
+        object_transform.set_local_scale([1.0, 1.0, 1.0]);
     }
+
+    object_transform.rotate(Axis::ZAxis, 10.0);
 }
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 
@@ -138,7 +141,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 alpha_engine::event::ElementState::Released => (),
             },
             VirtualKeyCode::P => match key.state {
-                alpha_engine::event::ElementState::Pressed => system.set_framerate_target(1.0),
+                alpha_engine::event::ElementState::Pressed => system.set_framerate_target(10.0),
                 alpha_engine::event::ElementState::Released => system.set_framerate_target(60.0),
             },
             _ => (),

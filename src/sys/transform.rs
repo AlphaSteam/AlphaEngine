@@ -11,6 +11,7 @@ pub struct Transform {
     local_position: Vec3,
     local_rotation: Quat,
     local_scale: Vec3,
+    default_scale: Vec3,
     pub delta_time: f32,
 }
 
@@ -30,6 +31,7 @@ impl Transform {
             local_position: position,
             local_rotation: glm::quat_identity(),
             local_scale: scale,
+            default_scale: scale,
             delta_time: 0.0,
         };
 
@@ -65,7 +67,7 @@ impl Transform {
 
     pub fn translate(&mut self, position: [f32; 3]) {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
-        self.local_position = self.local_position + position_vec3 * self.delta_time;
+        self.local_position = self.local_position + (position_vec3 * self.delta_time);
     }
 
     pub fn set_local_position(&mut self, position: [f32; 3]) {
@@ -101,14 +103,24 @@ impl Transform {
 
     pub fn rotate(&mut self, axis: Axis, angle: f32) {
         let axis_value = axis.value();
-        self.local_rotation = glm::quat_rotate(&self.local_rotation, angle, &axis_value);
+        self.local_rotation =
+            glm::quat_rotate(&self.local_rotation, angle * self.delta_time, &axis_value);
     }
 
     pub fn scale(&mut self, scale: [f32; 3]) {
-        let scale_vec3 = glm::vec3(scale[0], scale[1], scale[2]);
+        println!("Delta:{}", self.delta_time);
+        let scale_vec3 = glm::vec3(
+            1.0 + (scale[0] * self.delta_time) - self.delta_time,
+            1.0 + (scale[1] * self.delta_time) - self.delta_time,
+            1.0 + (scale[2] * self.delta_time) - self.delta_time,
+        );
+        println!("Scale vec: {:?}", scale_vec3);
         self.local_scale = glm::matrix_comp_mult(&self.local_scale, &scale_vec3);
     }
-
+    pub fn set_local_scale(&mut self, scale: [f32; 3]) {
+        let scale_vec3 = glm::vec3(scale[0], scale[1], scale[2]);
+        self.local_scale = glm::matrix_comp_mult(&self.default_scale, &scale_vec3);
+    }
     /**
     Inmutable access to local scale.
 

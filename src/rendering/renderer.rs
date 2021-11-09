@@ -1,6 +1,6 @@
 extern crate glium;
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 pub use crate::rendering::vertex::Vertex;
 use crate::sys::system::System;
@@ -97,11 +97,13 @@ impl Renderer {
         display: &Display,
         egui: &mut EguiGlium,
         fps: f32,
+        frame_time: Duration,
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(&display);
 
         egui::Window::new("Debug").show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
+            ui.label(format!("Frame time: {:?}", frame_time))
         });
 
         let (needs_repaint, shapes) = egui.end_frame(&display);
@@ -121,12 +123,14 @@ impl Renderer {
         } else {
             self.fps_index = 0;
         }
-        let fps = self.last_fps.iter().sum::<f32>() / 20.0;
-        let fps = (1.0 / (fps / 1_000_000_000.0)).round();
+        let fps_mean = self.last_fps.iter().sum::<f32>() / 20.0;
+        let fps_mean = (1.0 / (fps_mean / 1_000_000_000.0)).round();
+
+        let fps_raw = (1.0 / (time_since_render.as_nanos() as f32 / 1_000_000_000.0)).round();
         for (_game_object_id, game_object) in system.game_objects_mut().iter_mut() {
-            game_object.transform_mut().delta_time = 1.0 / fps;
+            game_object.transform_mut().delta_time = 1.0 / fps_raw;
         }
-        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps);
+        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
         let mut target = display.draw();
 
         let program = glium::Program::from_source(
