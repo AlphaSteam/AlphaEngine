@@ -1,10 +1,13 @@
 #![allow(unused_imports)]
 extern crate alpha_engine;
 use std::borrow::Borrow;
+use std::time::Duration;
 
 use alpha_engine::audio::audio_engine::algebra::{UnitQuaternion, Vector3};
 use alpha_engine::audio::audio_engine::buffer::{DataSource, SoundBufferResource};
 use alpha_engine::audio::audio_engine::context::SoundContext;
+use alpha_engine::audio::audio_engine::effects::reverb::Reverb;
+use alpha_engine::audio::audio_engine::effects::{BaseEffect, Effect, EffectInput};
 use alpha_engine::audio::audio_engine::engine::SoundEngine;
 use alpha_engine::audio::audio_engine::futures::executor::block_on;
 use alpha_engine::audio::audio_engine::hrtf::Vec3;
@@ -115,7 +118,7 @@ fn update(system: &mut System, _event_manager: &mut EventManager) {
             .source_mut(*handle)
             .spatial_mut()
             .set_position(Vector3::new(
-                old_position[0] + 1.0,
+                old_position[0] + 0.1,
                 old_position[1],
                 old_position[2],
             ));
@@ -200,18 +203,31 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     let sound_context = system
                         .get_sound_context("Basic context".to_string())
                         .unwrap();
-                    let moving = system.get_sound_source("Moving".to_string()).unwrap();
                     let left = system.get_sound_source("Left".to_string()).unwrap();
                     let right = system.get_sound_source("Right".to_string()).unwrap();
 
-                    if sound_context.state().source_mut(*moving).status() == Status::Paused {
-                        sound_context.state().source_mut(*moving).play();
+                    if sound_context.state().source_mut(*left).status() == Status::Paused {
                         sound_context.state().source_mut(*left).play();
                         sound_context.state().source_mut(*right).play();
                     } else {
-                        sound_context.state().source_mut(*moving).pause();
                         sound_context.state().source_mut(*left).pause();
                         sound_context.state().source_mut(*right).pause();
+                    }
+                }
+                _ => (),
+            },
+
+            VirtualKeyCode::C => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    let sound_context = system
+                        .get_sound_context("Basic context".to_string())
+                        .unwrap();
+                    let moving = system.get_sound_source("Moving".to_string()).unwrap();
+
+                    if sound_context.state().source_mut(*moving).status() == Status::Paused {
+                        sound_context.state().source_mut(*moving).play();
+                    } else {
+                        sound_context.state().source_mut(*moving).pause();
                     }
                 }
                 _ => (),
@@ -233,9 +249,9 @@ fn mouse_motion(_delta: (f64, f64), _device_id: DeviceId) {
     //println!("MouseMotion, {:?}, {:?}", delta, device_id)
 }
 fn setup_sound(system: &mut System) {
-    let sound_context = system.create_sound_context();
+    let mut sound_context = system.create_sound_context();
 
-    system.add_sound_context("Basic context".to_string(), sound_context);
+    sound_context = system.add_sound_context("Basic context".to_string(), sound_context);
     let sound_buffer = system.add_sound_buffer_from_file(
         "Punch".to_string(),
         "src/audio/punch.wav".to_string(),
@@ -260,7 +276,7 @@ fn setup_sound(system: &mut System) {
     let generic_left_source = GenericSourceBuilder::new()
         .with_buffer(sine_source.clone())
         .with_status(Status::Paused)
-        .with_gain(0.5)
+        .with_gain(0.8)
         .with_looping(true)
         .with_pitch(1.0);
     let mut left_source = system.create_sound_source_from_generic(generic_left_source, true);
@@ -275,7 +291,7 @@ fn setup_sound(system: &mut System) {
     let generic_right_source = GenericSourceBuilder::new()
         .with_buffer(sine_source.clone())
         .with_status(Status::Paused)
-        .with_gain(0.5)
+        .with_gain(1.0)
         .with_looping(true)
         .with_pitch(1.25);
 
@@ -286,17 +302,31 @@ fn setup_sound(system: &mut System) {
     let handle = system.add_source_to_context("Basic context".to_string(), right_source);
 
     system.add_sound_source("Right".to_string(), handle);
+
     // Moving spatial source
     let generic_moving = GenericSourceBuilder::new()
         .with_buffer(sine_source)
         .with_status(Status::Paused)
-        .with_gain(0.10)
+        .with_gain(0.1)
         .with_looping(true)
         .with_pitch(2.0);
 
     let moving_source = system.create_sound_source_from_generic(generic_moving, true);
     let handle = system.add_source_to_context("Basic context".to_string(), moving_source);
     system.add_sound_source("Moving".to_string(), handle);
+
+    let base_effect = BaseEffect::default();
+    let mut reverb = Reverb::new(base_effect);
+    reverb.set_decay_time(Duration::from_secs_f32(4.0));
+    reverb.set_dry(1.5);
+    reverb.set_gain(0.1);
+    reverb.set_fc(90.0);
+    let reverb_handle = sound_context.state().add_effect(Effect::Reverb(reverb));
+
+    sound_context
+        .state()
+        .effect_mut(reverb_handle)
+        .add_input(EffectInput::direct(handle));
 }
 fn main() {
     let game = Game::new(start, update, stop);
