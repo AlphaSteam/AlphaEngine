@@ -1,5 +1,6 @@
 extern crate image;
 extern crate nalgebra_glm as glm;
+pub mod audio;
 pub mod engine;
 pub mod event;
 pub mod game;

@@ -6,8 +6,9 @@ use glium::Display;
 use crate::event::event_manager::EventManager;
 pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
-pub use crate::sys::system::System;
 pub use crate::window::Window;
+
+use super::system::System;
 
 /**
 Struct that hosts the engine functions

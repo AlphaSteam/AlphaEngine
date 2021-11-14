@@ -1,11 +1,10 @@
 use std::time::{Duration, Instant};
 
-use glutin::event_loop::EventLoop;
-
 use crate::event::event_manager::EventManager;
 pub use crate::game::Game;
 pub use crate::sys::private_system::PrivateSystem;
 use crate::window::Window;
+use glutin::event_loop::EventLoop;
 
 pub struct Engine {
     event_loop: EventLoop<()>,
@@ -37,6 +36,29 @@ impl Engine {
         let mut old_render = Instant::now();
         let mut old_frame = Instant::now();
         let mut remaining_time = private_system.system().frame_time_target_nanos();
+
+        // Sound
+        /*       let engine = SoundEngine::new();
+        let context = SoundContext::new();
+
+        engine.lock().unwrap().add_context(context.clone());
+
+        let sound_buffer = SoundBufferResource::new_generic(
+            rg3d_sound::futures::executor::block_on(DataSource::from_file(
+                "/home/alphasteam/Escritorio/Dev/Motor de videojuegos/alpha_engine/src/assets/sounds/440.wav",
+            ))
+            .unwrap(),
+        )
+        .unwrap();
+
+        let source = GenericSourceBuilder::new()
+            .with_buffer(sound_buffer)
+            .with_status(Status::Playing)
+            .with_looping(false)
+            .build_source()
+            .unwrap();
+
+        context.state().add_source(source); */
         self.event_loop.run(move |ev, _, control_flow| {
             let now = Instant::now();
 

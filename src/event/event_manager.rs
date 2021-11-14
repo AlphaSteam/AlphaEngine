@@ -1,11 +1,10 @@
+use crate::sys::system::System;
 use glutin::dpi::PhysicalPosition;
 use glutin::event::DeviceId;
 use glutin::event::ElementState;
 use glutin::event::KeyboardInput;
 use glutin::event::MouseButton;
 use glutin::event::MouseScrollDelta;
-
-use crate::sys::system::System;
 
 #[derive(Clone, Copy)]
 /**

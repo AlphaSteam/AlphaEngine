@@ -108,13 +108,11 @@ impl Transform {
     }
 
     pub fn scale(&mut self, scale: [f32; 3]) {
-        println!("Delta:{}", self.delta_time);
         let scale_vec3 = glm::vec3(
             1.0 + (scale[0] * self.delta_time) - self.delta_time,
             1.0 + (scale[1] * self.delta_time) - self.delta_time,
             1.0 + (scale[2] * self.delta_time) - self.delta_time,
         );
-        println!("Scale vec: {:?}", scale_vec3);
         self.local_scale = glm::matrix_comp_mult(&self.local_scale, &scale_vec3);
     }
     pub fn set_local_scale(&mut self, scale: [f32; 3]) {

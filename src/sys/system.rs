@@ -4,18 +4,23 @@ use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
 use super::game_object::GameObject;
+use crate::audio::audio_engine::AudioEngine;
 pub use crate::game::Game;
 use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
 use crate::{rendering::vertex::Vertex, shaders::Shader};
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
+use rg3d_sound::{
+    buffer::SoundBufferResource,
+    context::SoundContext,
+    pool::Handle,
+    source::{generic::GenericSourceBuilder, SoundSource},
+};
 /**
 Struct that hosts the engine functions
 
-
 */
-#[derive(Debug)]
 pub struct System {
     game_objects: HashMap<String, GameObject>,
     vertex_buffers: HashMap<String, VertexBuffer<Vertex>>,
@@ -28,6 +33,7 @@ pub struct System {
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
+    audio_engine: AudioEngine,
 }
 
 impl System {
@@ -53,6 +59,7 @@ impl System {
             text: Vec::new(),
             text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
+            audio_engine: AudioEngine::new(),
         }
     }
     pub fn game_objects(&self) -> &HashMap<String, GameObject> {
@@ -210,5 +217,110 @@ impl System {
     }
     pub fn framerate_target(&self) -> f32 {
         1.0 / (self.frame_time_target_nanos as f32 / 1_000_000_000.0)
+    }
+    pub fn create_sound_context(&self) -> SoundContext {
+        self.audio_engine.create_sound_context(&self.camera())
+    }
+    pub fn sound_contexts(&self) -> &HashMap<String, SoundContext> {
+        &self.audio_engine.sound_contexts()
+    }
+
+    pub fn sound_contexts_mut(&mut self) -> &mut HashMap<String, SoundContext> {
+        self.audio_engine.sound_contexts_mut()
+    }
+
+    pub fn get_sound_context_mut(&mut self, sound_context_id: String) -> Option<&mut SoundContext> {
+        let entry = self
+            .audio_engine
+            .sound_contexts_mut()
+            .entry(sound_context_id);
+        match entry {
+            std::collections::hash_map::Entry::Occupied(object) => Some(object.into_mut()),
+            std::collections::hash_map::Entry::Vacant(_) => None,
+        }
+    }
+    pub fn get_sound_context(&self, sound_context_id: String) -> Option<&SoundContext> {
+        let entry = self
+            .audio_engine
+            .sound_contexts()
+            .get_key_value(&sound_context_id);
+        match entry {
+            Some((_, sound_context)) => Some(sound_context),
+            None => todo!(),
+        }
+    }
+    pub fn add_sound_context(
+        &mut self,
+        sound_context_id: String,
+        sound_context: SoundContext,
+    ) -> SoundContext {
+        let sound_contexts = self.sound_contexts_mut();
+        sound_contexts
+            .entry(sound_context_id)
+            .or_insert(sound_context.clone());
+        self.audio_engine
+            .sound_engine()
+            .lock()
+            .unwrap()
+            .add_context(sound_context.clone());
+        sound_context
+    }
+    pub fn remove_sound_context(&mut self, sound_context_id: String) -> Option<SoundContext> {
+        let sound_contexts = self.sound_contexts_mut();
+        sound_contexts.remove(&sound_context_id)
+    }
+
+    pub fn add_sound_buffer_from_file(
+        &mut self,
+        sound_buffer_id: String,
+        sound_path: String,
+        stream: bool,
+    ) -> SoundBufferResource {
+        self.audio_engine
+            .add_sound_buffer_from_file(sound_buffer_id, sound_path, stream)
+    }
+    pub fn sound_sources(&self) -> &HashMap<String, Handle<SoundSource>> {
+        &self.audio_engine.sound_sources()
+    }
+
+    pub fn sound_sources_mut(&mut self) -> &mut HashMap<String, Handle<SoundSource>> {
+        self.audio_engine.sound_sources_mut()
+    }
+    pub fn create_sound_source_from_generic(
+        &self,
+        generic_source_builder: GenericSourceBuilder,
+        spatial: bool,
+    ) -> SoundSource {
+        self.audio_engine
+            .create_sound_source_from_generic(generic_source_builder, spatial)
+    }
+    pub fn add_sound_source(
+        &mut self,
+        sound_source_id: String,
+        sound_source: Handle<SoundSource>,
+    ) -> Handle<SoundSource> {
+        self.audio_engine
+            .add_sound_source(sound_source_id, sound_source)
+    }
+    pub fn get_sound_source(&self, sound_source_id: String) -> Option<&Handle<SoundSource>> {
+        self.audio_engine.get_sound_source(sound_source_id)
+    }
+    pub fn get_sound_source_mut(
+        &mut self,
+        sound_source_id: String,
+    ) -> Option<&mut Handle<SoundSource>> {
+        self.audio_engine.get_sound_source_mut(sound_source_id)
+    }
+    pub fn remove_sound_source(&mut self, sound_source_id: String) -> Option<Handle<SoundSource>> {
+        self.audio_engine.remove_sound_source(sound_source_id)
+    }
+    #[allow(unused_must_use)]
+    pub fn add_source_to_context(
+        &mut self,
+        sound_context_id: String,
+        source: SoundSource,
+    ) -> Handle<SoundSource> {
+        self.audio_engine
+            .add_source_to_context(sound_context_id, source)
     }
 }
