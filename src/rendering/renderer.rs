@@ -25,11 +25,11 @@ impl Renderer {
     pub fn start(&self, display: &Display, system: &mut System) {
         let game_objects = system.game_objects_mut().clone();
         for (game_object_id, game_object) in game_objects {
-            let shape = game_object.mesh().vertices();
+            let shape = game_object.as_ref().get_base_properties().mesh().vertices();
             let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
             system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
 
-            let indices = game_object.mesh().indices();
+            let indices = game_object.get_base_properties().mesh().indices();
             let index_buffer = glium::IndexBuffer::new(
                 display,
                 glium::index::PrimitiveType::TrianglesList,
@@ -38,7 +38,7 @@ impl Renderer {
             .unwrap();
             system.add_index_buffer(game_object_id.clone(), index_buffer);
 
-            let image = game_object.texture();
+            let image = game_object.get_base_properties().texture();
             let image_dimensions = image.dimensions();
             let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
                 &image.clone().into_bytes(),
@@ -46,7 +46,7 @@ impl Renderer {
             );
 
             let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
-            system.add_texture(game_object_id, texture);
+            system.add_texture(game_object_id.clone(), texture);
         }
         let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
 
@@ -128,7 +128,10 @@ impl Renderer {
 
         let fps_raw = (1.0 / (time_since_render.as_nanos() as f32 / 1_000_000_000.0)).round();
         for (_game_object_id, game_object) in system.game_objects_mut().iter_mut() {
-            game_object.transform_mut().delta_time = 1.0 / fps_raw;
+            game_object
+                .get_base_properties_mut()
+                .transform_mut()
+                .delta_time = 1.0 / fps_raw;
         }
         let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
         let mut target = display.draw();
@@ -159,7 +162,11 @@ impl Renderer {
         let view = *system.camera().transform().get_view_matrix().as_ref();
 
         for (game_object_id, game_object) in system.game_objects().iter() {
-            let model = *game_object.transform().get_model_matrix().as_ref();
+            let model = *game_object
+                .get_base_properties()
+                .transform()
+                .get_model_matrix()
+                .as_ref();
 
             let vertex_buffer = &system.vertex_buffers()[game_object_id];
             let index_buffer = &system.index_buffers()[game_object_id];

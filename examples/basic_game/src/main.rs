@@ -1,4 +1,6 @@
 #![allow(unused_imports)]
+pub mod card;
+
 extern crate alpha_engine;
 use std::borrow::Borrow;
 use std::time::Duration;
@@ -10,90 +12,51 @@ use alpha_engine::audio::audio_engine::effects::reverb::Reverb;
 use alpha_engine::audio::audio_engine::effects::{BaseEffect, Effect, EffectInput};
 use alpha_engine::audio::audio_engine::engine::SoundEngine;
 use alpha_engine::audio::audio_engine::futures::executor::block_on;
-use alpha_engine::audio::audio_engine::hrtf::Vec3;
 use alpha_engine::audio::audio_engine::math::Matrix4Ext;
 use alpha_engine::audio::audio_engine::source::generic::GenericSourceBuilder;
 use alpha_engine::audio::audio_engine::source::spatial::SpatialSourceBuilder;
 use alpha_engine::audio::audio_engine::source::{SoundSource, Status};
 use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
+use alpha_engine::helpers::*;
+use alpha_engine::sys::game_object;
+use alpha_engine::sys::game_object::GenericGameObject;
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
+
 use game::Game;
 use sys::{
     axes::Axis, cam::projection_ortho::ProjectionOrtho,
     cam::projection_perspective::ProjectionPerspective, fullscreen::Fullscreen,
     game_object::GameObject, system::System,
 };
-use text::font::Font;
+
+use crate::card::Card;
 fn start(system: &mut System, event_manager: &mut EventManager) {
     system.set_window_fullscreen(Fullscreen::False);
     system.set_window_resolution([600, 800]);
     system.set_window_maximized(true);
     system.set_current_shader(Shader::Basic);
 
-    /*    system.add_font("Arial", "src/fonts/ArialCE.ttf");
-    system.render_text(
-        "Test".to_string(),
-        "Arial".to_string(),
-        [200.0, 200.0],
-        [10.0, 10.0],
-        0.0,
-        [1.0, 1.0, 1.0],
-    ); */
-    //let projection = ProjectionPerspective::new(0.6, 120.0, 0.0, 800.0);
-    //system.camera_mut().set_projection(projection);
-    //let window_resolution = system.get_window_resolution();
-    /*   let projection = ProjectionOrtho::new(
-        0.0,
-        window_resolution[0],
-        0.0,
-        window_resolution[1],
-        -500.0,
-        500.0,
-    ); */
-    //system.camera_mut().set_projection(projection);
-    /*  system
-    .camera_mut()
-    .transform_mut()
-    .rotate(Axis::YAxis, -90.0); */
+    setup_game_objects(system);
+    event_manager.set_key_callback(process_inputs);
 
-    let mut sprite = GameObject::game_object_from_sprite(
-        [500.0, 200.0, 0.0],
-        "src/sprites/placeholder.png".to_string(),
-    );
-    sprite.transform_mut().set_local_scale([1.0, 1.5, 1.0]);
-    sprite.transform_mut().rotate(Axis::ZAxis, -90.0);
-    //sprite.transform_mut().rotate(Axis::XAxis, 90.0);
-    //sprite.transform_mut().rotate(Axis::YAxis, 90.0);
-
-    system.add_game_object("Sprite 1".to_string(), sprite);
-
-    let sprite2 = GameObject::game_object_from_sprite(
-        [500.0, 200.0, 0.0],
-        "src/sprites/placeholder.png".to_string(),
-    );
-    system.add_game_object("Sprite 2".to_string(), sprite2);
     event_manager.set_key_callback(process_inputs);
     event_manager.set_device_added_callback(device_added);
     event_manager.set_device_removed_callback(device_removed);
     event_manager.set_motion_callback(motion);
     event_manager.set_mouse_motion_callback(mouse_motion);
 
-    let sprite3 =
-        GameObject::game_object_from_sprite([1300.0, 200.0, 0.0], "NOT EXISTENT.png".to_string());
-    system.add_game_object("Sprite 3".to_string(), sprite3);
-    event_manager.set_key_callback(process_inputs);
-
     setup_sound(system);
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
-    let window_res = system.get_window_resolution().clone();
-    let mut object_transform = system
+    let window_res = system.get_window_resolution();
+    let object_transform = system
         .get_game_object_mut("Sprite 2".to_string())
         .unwrap()
-        .transform_mut()
-        .clone();
+        .get_base_properties_mut()
+        .transform_mut();
+
     object_transform.rotate(Axis::ZAxis, 10.0);
     if object_transform.local_position()[0] < window_res[0] {
         object_transform.translate([1000.0, 0.0, 0.0]);
@@ -117,17 +80,17 @@ fn update(system: &mut System, _event_manager: &mut EventManager) {
             .state()
             .source_mut(*handle)
             .spatial_mut()
-            .set_position(Vector3::new(
+            .set_position(array3_to_vec3([
                 old_position[0] + 0.1,
                 old_position[1],
                 old_position[2],
-            ));
+            ]));
     } else {
         sound_context
             .state()
             .source_mut(*handle)
             .spatial_mut()
-            .set_position(Vector3::new(-1.0, 0.0, 0.0));
+            .set_position(array3_to_vec3([-1.0, 0.0, 0.0]));
     }
 }
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
@@ -146,6 +109,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     system
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
+                        .get_base_properties_mut()
                         .transform_mut()
                         .translate([1000.0, 0.0, 0.0]);
                 }
@@ -156,6 +120,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     system
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
+                        .get_base_properties_mut()
                         .transform_mut()
                         .translate([-1000.0, 0.0, 0.0]);
                 }
@@ -167,6 +132,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     system
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
+                        .get_base_properties_mut()
                         .transform_mut()
                         .translate([0.0, -1000.0, 0.0]);
                     system.set_framerate_target(system.framerate_target() - 1.0)
@@ -178,6 +144,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     system
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
+                        .get_base_properties_mut()
                         .transform_mut()
                         .translate([0.0, 1000.0, 0.0]);
                     system.set_framerate_target(system.framerate_target() + 1.0)
@@ -232,6 +199,18 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 }
                 _ => (),
             },
+            VirtualKeyCode::N => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    let card = Card::card_from_sprite(
+                        [400.0, 400.0, 0.0],
+                        "src/sprites/card.png".to_string(),
+                        0,
+                    );
+                    system.add_game_object("Card".to_string(), Box::new(card));
+                }
+                _ => (),
+            },
+
             _ => (),
         },
     };
@@ -281,7 +260,7 @@ fn setup_sound(system: &mut System) {
         .with_pitch(1.0);
     let mut left_source = system.create_sound_source_from_generic(generic_left_source, true);
     let left_source_spatial = left_source.spatial_mut();
-    left_source_spatial.set_position(Vector3::new(-100.0, 0.0, 0.0));
+    left_source_spatial.set_position(array3_to_vec3([-100.0, 0.0, 0.0]));
 
     let handle = system.add_source_to_context("Basic context".to_string(), left_source);
 
@@ -297,7 +276,7 @@ fn setup_sound(system: &mut System) {
 
     let mut right_source = system.create_sound_source_from_generic(generic_right_source, true);
     let right_source_spatial = right_source.spatial_mut();
-    right_source_spatial.set_position(Vector3::new(100.0, 0.0, 0.0));
+    right_source_spatial.set_position(array3_to_vec3([100.0, 0.0, 0.0]));
 
     let handle = system.add_source_to_context("Basic context".to_string(), right_source);
 
@@ -319,7 +298,7 @@ fn setup_sound(system: &mut System) {
     let mut reverb = Reverb::new(base_effect);
     reverb.set_decay_time(Duration::from_secs_f32(4.0));
     reverb.set_dry(1.5);
-    reverb.set_gain(0.1);
+    reverb.set_gain(0.01);
     reverb.set_fc(90.0);
     let reverb_handle = sound_context.state().add_effect(Effect::Reverb(reverb));
 
@@ -327,6 +306,43 @@ fn setup_sound(system: &mut System) {
         .state()
         .effect_mut(reverb_handle)
         .add_input(EffectInput::direct(handle));
+}
+fn setup_game_objects(system: &mut System) {
+    let mut sprite = GenericGameObject::game_object_from_sprite(
+        [500.0, 200.0, 0.0],
+        "src/sprites/placeholder.png".to_string(),
+    );
+    sprite
+        .get_base_properties_mut()
+        .transform_mut()
+        .set_local_scale([1.0, 1.5, 1.0]);
+    sprite
+        .get_base_properties_mut()
+        .transform_mut()
+        .rotate(Axis::ZAxis, -90.0);
+    //sprite.transform_mut().rotate(Axis::XAxis, 90.0);
+    //sprite.transform_mut().rotate(Axis::YAxis, 90.0);
+
+    system.add_game_object("Sprite 1".to_string(), Box::new(sprite));
+
+    let sprite2 = GenericGameObject::game_object_from_sprite(
+        [500.0, 200.0, 0.0],
+        "src/sprites/placeholder.png".to_string(),
+    );
+    system.add_game_object("Sprite 2".to_string(), Box::new(sprite2));
+
+    let sprite3 = GenericGameObject::game_object_from_sprite(
+        [1300.0, 200.0, 0.0],
+        "NOT EXISTENT.png".to_string(),
+    );
+    system.add_game_object("Sprite 3".to_string(), Box::new(sprite3));
+
+    let mut card =
+        Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 0);
+    card.get_base_properties_mut()
+        .transform_mut()
+        .set_local_scale([0.2, 0.2, 1.0]);
+    system.add_game_object("Card".to_string(), Box::new(card));
 }
 fn main() {
     let game = Game::new(start, update, stop);

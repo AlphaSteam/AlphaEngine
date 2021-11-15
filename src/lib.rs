@@ -4,6 +4,7 @@ pub mod audio;
 pub mod engine;
 pub mod event;
 pub mod game;
+pub mod helpers;
 mod rendering;
 pub mod shaders;
 pub mod sys;
