@@ -1,4 +1,6 @@
-use alpha_engine::sys::game_object::{BaseGameObjectProperties, GameObject, GenericGameObject};
+use alpha_engine::sys::game_object::{
+    BaseGameObjectProperties, GameObject, GenericGameObject, GmObj,
+};
 
 #[derive(Clone)]
 pub struct Card {
@@ -20,8 +22,11 @@ impl Card {
             cost,
         }
     }
+    pub fn cost(&self) -> i32 {
+        self.cost
+    }
 }
-impl GameObject for Card {
+impl GmObj for Card {
     fn get_base_properties(&self) -> &BaseGameObjectProperties {
         &self.base_properties
     }

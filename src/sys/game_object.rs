@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::io::Cursor;
 
 pub use crate::rendering::mesh::Mesh;
@@ -87,9 +88,26 @@ impl BaseGameObjectProperties {
     }
 }
 #[clonable]
-pub trait GameObject: Clone {
+pub trait GmObj: Clone {
     fn get_base_properties(&self) -> &BaseGameObjectProperties;
     fn get_base_properties_mut(&mut self) -> &mut BaseGameObjectProperties;
+}
+#[clonable]
+pub trait GameObject: GmObj + Any + Clone {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+impl<T> GameObject for T
+where
+    T: GmObj + Any,
+{
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -117,7 +135,7 @@ impl GenericGameObject {
         GenericGameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
     }
 }
-impl GameObject for GenericGameObject {
+impl GmObj for GenericGameObject {
     fn get_base_properties(&self) -> &BaseGameObjectProperties {
         &self.base_properties
     }

@@ -2,6 +2,7 @@
 pub mod card;
 
 extern crate alpha_engine;
+use std::any::Any;
 use std::borrow::Borrow;
 use std::time::Duration;
 
@@ -19,8 +20,8 @@ use alpha_engine::audio::audio_engine::source::{SoundSource, Status};
 use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
 use alpha_engine::helpers::*;
-use alpha_engine::sys::game_object;
 use alpha_engine::sys::game_object::GenericGameObject;
+use alpha_engine::sys::game_object::{self, GmObj};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
 
@@ -201,12 +202,21 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
             },
             VirtualKeyCode::N => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
-                    let card = Card::card_from_sprite(
+                    /* let card = Card::card_from_sprite(
                         [400.0, 400.0, 0.0],
                         "src/sprites/card.png".to_string(),
                         0,
-                    );
-                    system.add_game_object("Card".to_string(), Box::new(card));
+                    ); */
+                    //system.add_game_object("Card".to_string(), Box::new(card));
+
+                    let card: Card = system
+                        .get_game_object_mut("Card".to_string())
+                        .unwrap()
+                        .as_any()
+                        .downcast_ref::<Card>()
+                        .unwrap()
+                        .clone();
+                    println!("Card cost: {}", card.cost())
                 }
                 _ => (),
             },
@@ -338,7 +348,7 @@ fn setup_game_objects(system: &mut System) {
     system.add_game_object("Sprite 3".to_string(), Box::new(sprite3));
 
     let mut card =
-        Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 0);
+        Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 1);
     card.get_base_properties_mut()
         .transform_mut()
         .set_local_scale([0.2, 0.2, 1.0]);
