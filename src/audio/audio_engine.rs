@@ -1,3 +1,4 @@
+//! Module in charge of the audio processing of the engine.
 pub use rg3d_sound::*;
 use std::{collections::HashMap, sync::Arc};
 
@@ -14,6 +15,7 @@ use rg3d_sound::{
 
 use crate::sys::cam::camera::Camera;
 
+/// Struct that has the sound engine and it's resources.
 pub struct AudioEngine {
     sound_engine: Arc<std::sync::Mutex<SoundEngine>>,
     sound_contexts: HashMap<String, SoundContext>,
@@ -21,6 +23,7 @@ pub struct AudioEngine {
     sound_sources: HashMap<String, Handle<SoundSource>>,
 }
 impl AudioEngine {
+    /// AudioEngine initializer.
     pub fn new() -> Self {
         AudioEngine {
             sound_contexts: HashMap::new(),
@@ -29,13 +32,16 @@ impl AudioEngine {
             sound_engine: SoundEngine::new(),
         }
     }
+    /// Returns inmutable reference to sound contexts Hashmap.
     pub fn sound_contexts(&self) -> &HashMap<String, SoundContext> {
         &self.sound_contexts
     }
-
+    /// Returns mutable reference to sound contexts Hashmap.
     pub fn sound_contexts_mut(&mut self) -> &mut HashMap<String, SoundContext> {
         &mut self.sound_contexts
     }
+
+    /// Creates sound context and sets listener basis to a camera.
     pub fn create_sound_context(&self, camera: &Camera) -> SoundContext {
         let sound_context = SoundContext::new();
         let mut context = sound_context.state();
@@ -47,6 +53,8 @@ impl AudioEngine {
         listener.set_basis(basis);
         sound_context.clone()
     }
+    /// Returns mutable reference to sound context of given id.
+
     pub fn get_sound_context_mut(&mut self, sound_context_id: String) -> Option<&mut SoundContext> {
         let entry = self.sound_contexts.entry(sound_context_id);
         match entry {
@@ -54,6 +62,8 @@ impl AudioEngine {
             std::collections::hash_map::Entry::Vacant(_) => None,
         }
     }
+    /// Returns inmutable reference to sound context of given id.
+
     pub fn get_sound_context(&self, sound_context_id: String) -> Option<&SoundContext> {
         let entry = self.sound_contexts.get_key_value(&sound_context_id);
         match entry {
@@ -61,6 +71,8 @@ impl AudioEngine {
             None => todo!(),
         }
     }
+
+    /// Registers sound context in sound engine and adds it to system HashMap.
     pub fn add_sound_context(
         &mut self,
         sound_context_id: String,
@@ -76,20 +88,29 @@ impl AudioEngine {
             .add_context(sound_context.clone());
         sound_context
     }
+
+    /// Removes sound context from system HashMap.
     pub fn remove_sound_context(&mut self, sound_context_id: String) -> Option<SoundContext> {
         let sound_contexts = self.sound_contexts_mut();
         sound_contexts.remove(&sound_context_id)
     }
+    /// Returns reference to sound engine.
+
     pub fn sound_engine(&self) -> &Arc<std::sync::Mutex<SoundEngine>> {
         &self.sound_engine
     }
+    /// Returns inmutable reference to sound buffers HashMap.
+
     pub fn sound_buffers(&self) -> &HashMap<String, SoundBufferResource> {
         &self.sound_buffers
     }
+    /// Returns mutable reference to sound buffers HashMap.
 
     pub fn sound_buffers_mut(&mut self) -> &mut HashMap<String, SoundBufferResource> {
         &mut self.sound_buffers
     }
+    /// Creates sound buffer from a file path and adds it to system HashMap.
+
     pub fn add_sound_buffer_from_file(
         &mut self,
         sound_buffer_id: String,
