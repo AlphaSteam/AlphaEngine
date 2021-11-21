@@ -220,6 +220,13 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 }
                 _ => (),
             },
+            VirtualKeyCode::L => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    let res = system.send_packet(vec![1, 2, 3]);
+                    println!("Res: {:?}", res);
+                }
+                _ => (),
+            },
 
             _ => (),
         },

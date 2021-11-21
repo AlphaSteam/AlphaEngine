@@ -1,16 +1,19 @@
 use std::collections::HashMap;
+use std::env;
 
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
 use super::game_object::GameObject;
-use crate::audio::audio_engine::AudioEngine;
 pub use crate::game::Game;
 use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
+use crate::{audio::audio_engine::AudioEngine, net::Net};
 use crate::{rendering::vertex::Vertex, shaders::Shader};
+use crossbeam_channel::SendError;
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
+use laminar::Packet;
 use rg3d_sound::{
     buffer::SoundBufferResource,
     context::SoundContext,
@@ -34,6 +37,7 @@ pub struct System {
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
     audio_engine: AudioEngine,
+    net: Option<Net>,
 }
 
 impl System {
@@ -47,6 +51,16 @@ impl System {
             -10.0,
             10.0,
         );
+        let mut client_address = "127.0.0.1:12346";
+        let mut server_address = "127.0.0.1:12345";
+        let args: Vec<String> = env::args().collect();
+        for (i, argument) in env::args().enumerate() {
+            if argument == "--client-address" && args.len() > i + 1 {
+                client_address = &args[i + 1];
+            } else if argument == "--server-address" && args.len() > i + 1 {
+                server_address = &args[i + 1];
+            }
+        }
         Self {
             game_objects: HashMap::new(),
             vertex_buffers: HashMap::new(),
@@ -60,6 +74,10 @@ impl System {
             text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
             audio_engine: AudioEngine::new(),
+            net: Some(Net::connect(
+                server_address.parse().unwrap(),
+                client_address.parse().unwrap(),
+            )),
         }
     }
     pub fn game_objects(&self) -> &HashMap<String, Box<dyn GameObject>> {
@@ -318,5 +336,8 @@ impl System {
     ) -> Handle<SoundSource> {
         self.audio_engine
             .add_source_to_context(sound_context_id, source)
+    }
+    pub fn send_packet(&self, payload: Vec<u8>) -> Result<(), SendError<laminar::Packet>> {
+        self.net.as_ref().unwrap().send_packet(payload)
     }
 }

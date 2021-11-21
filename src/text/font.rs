@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use ab_glyph::{point, Font as abFont, FontRef, Glyph, ScaleFont};
+use super::character::Character;
+use ab_glyph::Glyph;
+use ab_glyph::{point, Font as abFont, FontRef, ScaleFont};
 use glium::{texture::SrgbTexture2d, Display};
 use image::{EncodableLayout, Rgb, RgbImage};
-
-use super::character::Character;
 #[derive(Debug)]
 pub struct Font {
     characters: HashMap<char, Character>,

@@ -45,73 +45,74 @@ impl Engine {
 
             *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
             match ev {
-                glutin::event::Event::WindowEvent { event, .. } => match event {
-                    glutin::event::WindowEvent::CloseRequested => {
-                        egui.on_event(&event);
-                        *control_flow = glutin::event_loop::ControlFlow::Exit;
-                        return;
-                    }
-                    glutin::event::WindowEvent::MouseInput {
-                        state,
-                        button,
-                        device_id,
-                        ..
-                    } => {
-                        egui.on_event(&event);
-                        event_manager.run_mouse_input_callback(state, button, device_id)
-                    }
-                    glutin::event::WindowEvent::CursorMoved {
-                        device_id,
-                        position,
-                        ..
-                    } => {
-                        egui.on_event(&event);
-                        event_manager.run_cursor_moved_callback(position, device_id)
-                    }
-                    glutin::event::WindowEvent::AxisMotion {
-                        axis,
-                        value,
-                        device_id,
-                    } => {
-                        egui.on_event(&event);
-                        event_manager.run_axis_motion_callback(axis, value, device_id);
-                    }
-                    _ => {
-                        egui.on_event(&event);
+                glutin::event::Event::WindowEvent { event, .. } => {
+                    egui.on_event(&event);
 
-                        display.gl_window().window().request_redraw();
+                    match event {
+                        glutin::event::WindowEvent::CloseRequested => {
+                            *control_flow = glutin::event_loop::ControlFlow::Exit;
+                            return;
+                        }
+                        glutin::event::WindowEvent::MouseInput {
+                            state,
+                            button,
+                            device_id,
+                            ..
+                        } => event_manager.run_mouse_input_callback(state, button, device_id),
+                        glutin::event::WindowEvent::CursorMoved {
+                            device_id,
+                            position,
+                            ..
+                        } => event_manager.run_cursor_moved_callback(position, device_id),
+                        glutin::event::WindowEvent::AxisMotion {
+                            axis,
+                            value,
+                            device_id,
+                        } => {
+                            event_manager.run_axis_motion_callback(axis, value, device_id);
+                        }
+                        glutin::event::WindowEvent::Focused(val) => {
+                            *event_manager.window_focused_mut() = val
+                        }
+                        _ => {
+                            display.gl_window().window().request_redraw();
+                        }
                     }
-                },
+                }
                 glutin::event::Event::DeviceEvent {
                     event, device_id, ..
-                } => match event {
-                    glutin::event::DeviceEvent::MouseMotion { delta } => {
-                        event_manager.run_mouse_motion_callback(delta, device_id)
+                } => {
+                    if *event_manager.window_focused() == true {
+                        match event {
+                            glutin::event::DeviceEvent::MouseMotion { delta } => {
+                                event_manager.run_mouse_motion_callback(delta, device_id)
+                            }
+                            glutin::event::DeviceEvent::MouseWheel { delta } => {
+                                event_manager.run_mouse_wheel_callback(delta, device_id)
+                            }
+                            glutin::event::DeviceEvent::Motion { axis, value } => {
+                                event_manager.run_motion_callback(axis, value, device_id)
+                            }
+                            glutin::event::DeviceEvent::Button { button, state } => {
+                                event_manager.run_button_callback(button, state, device_id)
+                            }
+                            glutin::event::DeviceEvent::Text { codepoint } => {
+                                event_manager.run_text_callback(codepoint, device_id)
+                            }
+                            glutin::event::DeviceEvent::Removed => {
+                                event_manager.run_device_removed_callback(device_id)
+                            }
+                            glutin::event::DeviceEvent::Added => {
+                                event_manager.run_device_added_callback(device_id)
+                            }
+                            glutin::event::DeviceEvent::Key(key) => event_manager.run_key_callback(
+                                &mut private_system.system_mut(),
+                                key,
+                                device_id,
+                            ),
+                        }
                     }
-                    glutin::event::DeviceEvent::MouseWheel { delta } => {
-                        event_manager.run_mouse_wheel_callback(delta, device_id)
-                    }
-                    glutin::event::DeviceEvent::Motion { axis, value } => {
-                        event_manager.run_motion_callback(axis, value, device_id)
-                    }
-                    glutin::event::DeviceEvent::Button { button, state } => {
-                        event_manager.run_button_callback(button, state, device_id)
-                    }
-                    glutin::event::DeviceEvent::Text { codepoint } => {
-                        event_manager.run_text_callback(codepoint, device_id)
-                    }
-                    glutin::event::DeviceEvent::Removed => {
-                        event_manager.run_device_removed_callback(device_id)
-                    }
-                    glutin::event::DeviceEvent::Added => {
-                        event_manager.run_device_added_callback(device_id)
-                    }
-                    glutin::event::DeviceEvent::Key(key) => event_manager.run_key_callback(
-                        &mut private_system.system_mut(),
-                        key,
-                        device_id,
-                    ),
-                },
+                }
 
                 glutin::event::Event::MainEventsCleared => {
                     let now = Instant::now();

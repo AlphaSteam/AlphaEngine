@@ -22,6 +22,7 @@ pub struct EventManager {
     mouse_input: fn(state: ElementState, button: MouseButton, device_id: DeviceId),
     cursor_moved: fn(position: PhysicalPosition<f64>, device_id: DeviceId),
     axis_motion: fn(axis: u32, value: f64, device_id: DeviceId),
+    window_focused: bool,
 }
 impl EventManager {
     pub fn new() -> Self {
@@ -48,6 +49,7 @@ impl EventManager {
             mouse_input,
             cursor_moved,
             axis_motion,
+            window_focused: false,
         }
     }
     /**
@@ -210,5 +212,11 @@ impl EventManager {
      */
     pub fn run_axis_motion_callback(&self, axis: u32, value: f64, device_id: DeviceId) {
         (self.axis_motion)(axis, value, device_id);
+    }
+    pub fn window_focused_mut(&mut self) -> &mut bool {
+        &mut self.window_focused
+    }
+    pub fn window_focused(&self) -> &bool {
+        &self.window_focused
     }
 }

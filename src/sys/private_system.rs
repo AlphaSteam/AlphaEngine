@@ -1,3 +1,4 @@
+use std::env;
 use std::time::Instant;
 
 use egui_glium::EguiGlium;
@@ -5,6 +6,7 @@ use glium::Display;
 
 use crate::event::event_manager::EventManager;
 pub use crate::game::Game;
+use crate::net::Net;
 pub use crate::rendering::renderer::Renderer;
 pub use crate::window::Window;
 

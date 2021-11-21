@@ -5,6 +5,7 @@ pub mod engine;
 pub mod event;
 pub mod game;
 pub mod helpers;
+pub mod net;
 mod rendering;
 pub mod shaders;
 pub mod sys;
