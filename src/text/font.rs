@@ -39,14 +39,9 @@ impl Font {
 
                 let texture = SrgbTexture2d::new(display, image).unwrap();
                 let h_bearing = font.as_scaled(scale).h_side_bearing(glyph_id);
-                let advance = font.as_scaled(scale).h_advance(glyph_id);
-                let character = Character::new(
-                    c as char,
-                    texture,
-                    img.dimensions(),
-                    [h_bearing, h_bearing],
-                    advance,
-                );
+                let _advance = font.as_scaled(scale).h_advance(glyph_id);
+                let character =
+                    Character::new(c as char, texture, img.dimensions(), [h_bearing, h_bearing]);
                 characters.insert(c as char, character);
 
                 //let path = "./chars/".to_string() + &c.to_string() + &".bmp".to_string();

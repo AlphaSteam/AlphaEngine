@@ -7,7 +7,7 @@ use crate::game::Game;
 use crate::sys::system::System;
 
 fn start(_system: &mut System, _event_manager: &mut EventManager) {}
-fn update(_system: &mut System, _event_manager: &mut EventManager, _time_step: f32) {}
+fn update(_system: &mut System, _event_manager: &mut EventManager) {}
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 fn main() {
     let game = Game::new(start, update, stop);

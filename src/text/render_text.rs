@@ -4,7 +4,6 @@ pub struct Text {
     pub font: String,
     pub position: [f32; 2],
     pub scale: [f32; 2],
-    rotation: f32,
     pub color: [f32; 3],
 }
 
@@ -14,7 +13,6 @@ impl Text {
         font: String,
         position: [f32; 2],
         scale: [f32; 2],
-        rotation: f32,
         color: [f32; 3],
     ) -> Self {
         Text {
@@ -22,7 +20,6 @@ impl Text {
             font,
             position,
             scale,
-            rotation,
             color,
         }
     }
