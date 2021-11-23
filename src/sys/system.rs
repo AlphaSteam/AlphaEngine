@@ -343,4 +343,7 @@ impl System {
     pub fn send_packet(&self, payload: Vec<u8>) {
         self.net.as_ref().unwrap().send_packet(payload);
     }
+    pub fn test_packets(&self) {
+        self.net.as_ref().unwrap().test_packets();
+    }
 }

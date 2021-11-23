@@ -1,7 +1,7 @@
+use core::time;
 use crossbeam_channel::Sender;
 pub use laminar::{Config, Packet, Socket, SocketEvent};
 use std::{net::SocketAddr, thread, time::Instant};
-
 pub struct Net {
     packet_sender: Sender<laminar::Packet>,
     server_address: SocketAddr,
@@ -20,7 +20,11 @@ impl Net {
                         SocketEvent::Packet(packet) => {
                             let endpoint: SocketAddr = packet.addr();
                             let received_data: &[u8] = packet.payload();
-                            println!("Endpoint: {}, received_data:{:?}", endpoint, received_data);
+                            println!(
+                                "Endpoint: {}, received_data:{}",
+                                endpoint,
+                                std::str::from_utf8(received_data).unwrap()
+                            );
                         }
                         SocketEvent::Connect(connect_event) => {
                             println!("Client: {} has connected", connect_event)
@@ -70,6 +74,25 @@ impl Net {
             let packet = Packet::reliable_unordered(server_address, payload);
             println!("Packet sent: {:?}", packet);
             packet_sender.send(packet)
+        });
+    }
+    pub fn test_packets(&self) {
+        let packet_sender = self.packet_sender.clone();
+        let server_address = self.server_address;
+        let _thread = thread::spawn(move || {
+            let mut i: i32 = 0;
+            loop {
+                i += 1;
+                let packet = Packet::reliable_unordered(server_address, i.to_string().into_bytes());
+
+                println!(
+                    "Packet sent: {:?} Data: {}",
+                    packet,
+                    std::str::from_utf8(packet.payload()).unwrap()
+                );
+                let _result = packet_sender.send(packet);
+                thread::sleep(time::Duration::from_secs(1));
+            }
         });
     }
 }

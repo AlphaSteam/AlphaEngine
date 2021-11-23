@@ -11,6 +11,7 @@ use crate::game::Game;
 use crate::sys::system::System;
 use alpha_engine::net::Config;
 fn start(system: &mut System, event_manager: &mut EventManager) {
+    // We get the ips of client and server from the arguments passed in the command line. If not present, we use some default ones.
     event_manager.set_key_callback(process_inputs);
 
     let mut client_address = "127.0.0.1:12346";
@@ -23,8 +24,10 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
             server_address = &args[i + 1];
         }
     }
+    // We create the config and set the number of seconds before a timeout is set.
     let mut config = Config::default();
     config.idle_connection_timeout = Duration::new(10, 0);
+    // We create the client by binding a socket to the provided ip.
     system.connect_to_network_with_config(
         server_address.parse().unwrap(),
         client_address.parse().unwrap(),
@@ -41,7 +44,15 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
         Some(virtual_key) => match virtual_key {
             VirtualKeyCode::S => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
+                    // If S is pressed, we send a package with a vector to the server ip provided when starting the program.
                     let _res = system.send_packet(vec![1, 2, 3]);
+                }
+                _ => (),
+            },
+            VirtualKeyCode::D => match key.state {
+                alpha_engine::event::ElementState::Pressed => {
+                    // If D is pressed, we send a number each second to the server ip provided when starting the program.
+                    let _res = system.test_packets();
                 }
                 _ => (),
             },
