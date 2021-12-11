@@ -7,6 +7,7 @@ pub mod game;
 pub mod helpers;
 pub mod net;
 mod rendering;
+pub mod scripting;
 pub mod shaders;
 pub mod sys;
 pub mod text;

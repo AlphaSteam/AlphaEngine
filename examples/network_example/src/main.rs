@@ -26,7 +26,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     }
     // We create the config and set the number of seconds before a timeout is set.
     let mut config = Config::default();
-    config.idle_connection_timeout = Duration::new(10, 0);
+    config.idle_connection_timeout = Duration::new(1, 0);
     // We create the client by binding a socket to the provided ip.
     system.connect_to_network_with_config(
         server_address.parse().unwrap(),

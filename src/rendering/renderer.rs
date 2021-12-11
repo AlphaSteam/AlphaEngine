@@ -23,7 +23,8 @@ impl Renderer {
         }
     }
     pub fn start(&self, display: &Display, system: &mut System) {
-        let game_objects = system.game_objects_mut().clone();
+        let mut game_objects = system.game_objects_mut().clone();
+        let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects {
             let shape = game_object.as_ref().get_base_properties().mesh().vertices();
             let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
@@ -127,7 +128,7 @@ impl Renderer {
         let fps_mean = (1.0 / (fps_mean / 1_000_000_000.0)).round();
 
         let fps_raw = (1.0 / (time_since_render.as_nanos() as f32 / 1_000_000_000.0)).round();
-        for (_game_object_id, game_object) in system.game_objects_mut().iter_mut() {
+        for (_game_object_id, game_object) in system.game_objects_mut().game_objects_mut().iter_mut() {
             game_object
                 .get_base_properties_mut()
                 .transform_mut()
@@ -160,8 +161,9 @@ impl Renderer {
         let projection = *system.camera().projection().get_projection().as_ref();
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
-
-        for (game_object_id, game_object) in system.game_objects().iter() {
+        let mut game_objects = system.game_objects_mut().clone();
+        let game_objects = game_objects.game_objects_mut();
+        for (game_object_id, game_object) in game_objects.iter() {
             let model = *game_object
                 .get_base_properties()
                 .transform()

@@ -20,11 +20,7 @@ impl Net {
                         SocketEvent::Packet(packet) => {
                             let endpoint: SocketAddr = packet.addr();
                             let received_data: &[u8] = packet.payload();
-                            println!(
-                                "Endpoint: {}, received_data:{}",
-                                endpoint,
-                                std::str::from_utf8(received_data).unwrap()
-                            );
+                            println!("Endpoint: {}, received_data:{:?}", endpoint, received_data);
                         }
                         SocketEvent::Connect(connect_event) => {
                             println!("Client: {} has connected", connect_event)

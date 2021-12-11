@@ -1,8 +1,6 @@
-use alpha_engine::sys::game_object::{
-    BaseGameObjectProperties, GameObject, GenericGameObject, GmObj,
-};
+use alpha_engine::sys::game_object::{BaseGameObjectProperties, GmObj};
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Card {
     base_properties: BaseGameObjectProperties,
     cost: i32,

@@ -24,7 +24,6 @@ use alpha_engine::sys::game_object::GenericGameObject;
 use alpha_engine::sys::game_object::{self, GmObj};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
-
 use game::Game;
 use sys::{
     axes::Axis, cam::projection_ortho::ProjectionOrtho,
@@ -40,8 +39,8 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     system.set_current_shader(Shader::Basic);
 
     setup_game_objects(system);
-    event_manager.set_key_callback(process_inputs);
 
+    event_manager.set_key_callback(process_inputs);
     event_manager.set_key_callback(process_inputs);
     event_manager.set_device_added_callback(device_added);
     event_manager.set_device_removed_callback(device_removed);
@@ -52,7 +51,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
     let window_res = system.get_window_resolution();
-    let object_transform = system
+    let object_transform = system.game_objects_mut()
         .get_game_object_mut("Sprite 2".to_string())
         .unwrap()
         .get_base_properties_mut()
@@ -107,7 +106,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     .camera_mut()
                     .transform_mut()
                     .translate([100.0, 0.0, 0.0]); */
-                    system
+                    system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
                         .get_base_properties_mut()
@@ -118,7 +117,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
             },
             VirtualKeyCode::A => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
-                    system
+                    system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
                         .get_base_properties_mut()
@@ -130,7 +129,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
 
             VirtualKeyCode::S => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
-                    system
+                    system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
                         .get_base_properties_mut()
@@ -142,7 +141,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
             },
             VirtualKeyCode::W => match key.state {
                 alpha_engine::event::ElementState::Pressed => {
-                    system
+                    system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
                         .unwrap()
                         .get_base_properties_mut()
@@ -209,7 +208,7 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     ); */
                     //system.add_game_object("Card".to_string(), Box::new(card));
 
-                    let card: Card = system
+                    let card: Card = system.game_objects_mut()
                         .get_game_object_mut("Card".to_string())
                         .unwrap()
                         .as_any()
@@ -333,26 +332,26 @@ fn setup_game_objects(system: &mut System) {
     //sprite.transform_mut().rotate(Axis::XAxis, 90.0);
     //sprite.transform_mut().rotate(Axis::YAxis, 90.0);
 
-    system.add_game_object("Sprite 1".to_string(), Box::new(sprite));
+    system.game_objects_mut().add_game_object("Sprite 1".to_string(), Box::new(sprite));
 
     let sprite2 = GenericGameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
     );
-    system.add_game_object("Sprite 2".to_string(), Box::new(sprite2));
+    system.game_objects_mut().add_game_object("Sprite 2".to_string(), Box::new(sprite2));
 
     let sprite3 = GenericGameObject::game_object_from_sprite(
         [1300.0, 200.0, 0.0],
         "NOT EXISTENT.png".to_string(),
     );
-    system.add_game_object("Sprite 3".to_string(), Box::new(sprite3));
+    system.game_objects_mut().add_game_object("Sprite 3".to_string(), Box::new(sprite3));
 
     let mut card =
         Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 1);
     card.get_base_properties_mut()
         .transform_mut()
         .set_local_scale([0.2, 0.2, 1.0]);
-    system.add_game_object("Card".to_string(), Box::new(card));
+    system.game_objects_mut().add_game_object("Card".to_string(), Box::new(card));
 }
 fn main() {
     let game = Game::new(start, update, stop);

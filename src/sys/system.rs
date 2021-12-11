@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
-use super::game_object::GameObject;
+use super::game_objects::GameObjects;
 pub use crate::game::Game;
 use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
@@ -22,8 +22,9 @@ use rg3d_sound::{
 Struct that hosts the engine functions
 
 */
+
 pub struct System {
-    game_objects: HashMap<String, Box<dyn GameObject>>,
+    game_objects: GameObjects,
     vertex_buffers: HashMap<String, VertexBuffer<Vertex>>,
     index_buffers: HashMap<String, IndexBuffer<u32>>,
     textures: HashMap<String, glium::texture::SrgbTexture2d>,
@@ -51,7 +52,7 @@ impl System {
         );
 
         Self {
-            game_objects: HashMap::new(),
+            game_objects: GameObjects::new(HashMap::new()),
             vertex_buffers: HashMap::new(),
             index_buffers: HashMap::new(),
             textures: HashMap::new(),
@@ -66,33 +67,13 @@ impl System {
             net: None,
         }
     }
-    pub fn game_objects(&self) -> &HashMap<String, Box<dyn GameObject>> {
+    
+    pub fn game_objects(&self) -> &GameObjects {
         &self.game_objects
     }
-
-    pub fn game_objects_mut(&mut self) -> &mut HashMap<String, Box<dyn GameObject>> {
+    pub fn game_objects_mut(&mut self) -> &mut GameObjects {
         &mut self.game_objects
     }
-
-    pub fn get_game_object_mut(
-        &mut self,
-        game_object_id: String,
-    ) -> Option<&mut Box<dyn GameObject>> {
-        let entry = self.game_objects.entry(game_object_id);
-        match entry {
-            std::collections::hash_map::Entry::Occupied(object) => Some(object.into_mut()),
-            std::collections::hash_map::Entry::Vacant(_) => None,
-        }
-    }
-    pub fn add_game_object(&mut self, game_object_id: String, game_object: Box<dyn GameObject>) {
-        let game_objects = self.game_objects_mut();
-        game_objects.entry(game_object_id).or_insert(game_object);
-    }
-    pub fn remove_game_object(&mut self, game_object_id: String) -> Option<Box<dyn GameObject>> {
-        let game_objects = self.game_objects_mut();
-        game_objects.remove(&game_object_id)
-    }
-
     pub fn vertex_buffers(&self) -> &HashMap<String, VertexBuffer<Vertex>> {
         &self.vertex_buffers
     }
@@ -346,4 +327,7 @@ impl System {
     pub fn test_packets(&self) {
         self.net.as_ref().unwrap().test_packets();
     }
+
+
+    
 }

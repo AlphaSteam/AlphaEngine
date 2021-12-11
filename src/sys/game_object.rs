@@ -1,4 +1,5 @@
 use std::any::Any;
+use std::fmt::Debug;
 use std::io::Cursor;
 
 pub use crate::rendering::mesh::Mesh;
@@ -6,6 +7,7 @@ pub use crate::sys::transform::Transform;
 use dyn_clonable::*;
 use image::io::Reader as ImageReader;
 use image::{DynamicImage, GenericImageView, ImageFormat};
+use rhai::Array;
 /**
 Struct that represents an object of the game.
 
@@ -87,20 +89,24 @@ impl BaseGameObjectProperties {
         &mut self.texture
     }
 }
+
+
+
 #[clonable]
 pub trait GmObj: Clone {
     fn get_base_properties(&self) -> &BaseGameObjectProperties;
     fn get_base_properties_mut(&mut self) -> &mut BaseGameObjectProperties;
 }
+
 #[clonable]
-pub trait GameObject: GmObj + Any + Clone {
+pub trait GameObject: GmObj + Any + Clone + Debug + Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 impl<T> GameObject for T
 where
-    T: GmObj + Any,
-{
+    T: GmObj + Any + Debug + Send + Sync,
+{ 
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -133,6 +139,21 @@ impl GenericGameObject {
         let texture_w = texture.width() as f32;
         let texture_h = texture.height() as f32;
         GenericGameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
+    }
+    pub fn game_object_from_sprite_script(position: Array, texture_path: &str) -> Self {
+        let mesh = Mesh::create_rectangle();
+
+        let texture = image::open(texture_path.clone());
+        let texture = match texture {
+            Ok(texture) => texture,
+            Err(_) => {
+                image::load_from_memory(include_bytes!("../assets/sprites/default.png")).unwrap()
+            }
+        };
+        let texture_w = texture.width() as f32;
+        let texture_h = texture.height() as f32;
+        GenericGameObject::new([position[0].clone_cast::<f64>() as f32,position[1].clone_cast::<f64>() as f32,position[2].clone_cast::<f64>() as f32],
+         [texture_w, texture_h, 1.0], mesh, texture_path.to_string())
     }
 }
 impl GmObj for GenericGameObject {

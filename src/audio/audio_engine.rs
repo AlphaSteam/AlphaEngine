@@ -16,6 +16,7 @@ use rg3d_sound::{
 use crate::sys::cam::camera::Camera;
 
 /// Struct that has the sound engine and it's resources.
+
 pub struct AudioEngine {
     sound_engine: Arc<std::sync::Mutex<SoundEngine>>,
     sound_contexts: HashMap<String, SoundContext>,
