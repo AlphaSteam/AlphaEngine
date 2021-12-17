@@ -3,7 +3,7 @@ extern crate glium;
 use std::time::{Duration, Instant};
 
 pub use crate::rendering::vertex::Vertex;
-use crate::sys::system::System;
+use crate::sys::{system::System};
 pub use crate::window::Window;
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
@@ -23,9 +23,10 @@ impl Renderer {
         }
     }
     pub fn start(&self, display: &Display, system: &mut System) {
-        let mut game_objects = system.game_objects_mut().clone();
+        let game_object_mutex = system.game_objects_mut().clone();
+        let mut game_objects = game_object_mutex;
         let game_objects = game_objects.game_objects_mut();
-        for (game_object_id, game_object) in game_objects {
+        for (game_object_id, game_object) in game_objects.iter() {
             let shape = game_object.as_ref().get_base_properties().mesh().vertices();
             let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
             system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
@@ -161,7 +162,10 @@ impl Renderer {
         let projection = *system.camera().projection().get_projection().as_ref();
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
-        let mut game_objects = system.game_objects_mut().clone();
+        let game_object_mutex = system.game_objects_mut().clone();
+        let mut game_objects = game_object_mutex;
+        let number_of_game_objects = game_objects.game_objects().len();
+        //println!("Game objects in render: {}",number_of_game_objects);
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {
             let model = *game_object

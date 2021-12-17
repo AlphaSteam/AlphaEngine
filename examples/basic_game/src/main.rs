@@ -4,6 +4,7 @@ pub mod card;
 extern crate alpha_engine;
 use std::any::Any;
 use std::borrow::Borrow;
+use std::thread;
 use std::time::Duration;
 
 use alpha_engine::audio::audio_engine::algebra::{UnitQuaternion, Vector3};
@@ -20,6 +21,7 @@ use alpha_engine::audio::audio_engine::source::{SoundSource, Status};
 use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
 use alpha_engine::helpers::*;
+use alpha_engine::scripting::ScriptEngine;
 use alpha_engine::sys::game_object::GenericGameObject;
 use alpha_engine::sys::game_object::{self, GmObj};
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
@@ -48,12 +50,28 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     event_manager.set_mouse_motion_callback(mouse_motion);
 
     setup_sound(system);
+
+   system.run_script(r#"
+
+   let generic_object = game_object_from_sprite(
+      [1000.0, 400.0, 0.0],
+      "src/sprites/card.png");
+      len(t)
+  //t.add_game_object("test",generic_object)
+  "#.to_string());
+
+    
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
+
+
+
+
+
     let window_res = system.get_window_resolution();
-    let object_transform = system.game_objects_mut()
-        .get_game_object_mut("Sprite 2".to_string())
-        .unwrap()
+    {
+    let mut game_objects = system.game_objects_mut().get_game_object_mut("Sprite 2".to_string());
+    let object_transform = game_objects
         .get_base_properties_mut()
         .transform_mut();
 
@@ -65,7 +83,7 @@ fn update(system: &mut System, _event_manager: &mut EventManager) {
         object_transform.set_local_position([-1.0, 1.0, 1.0]);
         object_transform.set_local_scale([1.0, 1.0, 1.0]);
     }
-
+    }
     let sound_context = system
         .get_sound_context("Basic context".to_string())
         .unwrap();
@@ -108,7 +126,6 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                     .translate([100.0, 0.0, 0.0]); */
                     system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
-                        .unwrap()
                         .get_base_properties_mut()
                         .transform_mut()
                         .translate([1000.0, 0.0, 0.0]);
@@ -119,7 +136,6 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 alpha_engine::event::ElementState::Pressed => {
                     system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
-                        .unwrap()
                         .get_base_properties_mut()
                         .transform_mut()
                         .translate([-1000.0, 0.0, 0.0]);
@@ -131,7 +147,6 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 alpha_engine::event::ElementState::Pressed => {
                     system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
-                        .unwrap()
                         .get_base_properties_mut()
                         .transform_mut()
                         .translate([0.0, -1000.0, 0.0]);
@@ -143,7 +158,6 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                 alpha_engine::event::ElementState::Pressed => {
                     system.game_objects_mut()
                         .get_game_object_mut("Sprite 2".to_string())
-                        .unwrap()
                         .get_base_properties_mut()
                         .transform_mut()
                         .translate([0.0, 1000.0, 0.0]);
@@ -210,7 +224,6 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
 
                     let card: Card = system.game_objects_mut()
                         .get_game_object_mut("Card".to_string())
-                        .unwrap()
                         .as_any()
                         .downcast_ref::<Card>()
                         .unwrap()
@@ -352,6 +365,8 @@ fn setup_game_objects(system: &mut System) {
         .transform_mut()
         .set_local_scale([0.2, 0.2, 1.0]);
     system.game_objects_mut().add_game_object("Card".to_string(), Box::new(card));
+
+
 }
 fn main() {
     let game = Game::new(start, update, stop);

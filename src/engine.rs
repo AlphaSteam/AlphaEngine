@@ -12,7 +12,7 @@ pub struct Engine {
     event_manager: EventManager,
 }
 impl Engine {
-    pub fn new(game: Game, win_title: String) -> Engine {
+    pub fn new(game: Game, win_title: String) -> Self {
         let window = Window::new(win_title);
         let display = window.display;
         let event_loop = window.event_loop;

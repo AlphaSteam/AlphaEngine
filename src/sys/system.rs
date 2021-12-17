@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
+use super::game_object::{GameObject, GenericGameObject};
 use super::game_objects::GameObjects;
 pub use crate::game::Game;
 use crate::text::{font::Font, render_text::Text};
@@ -12,12 +13,14 @@ use crate::{rendering::vertex::Vertex, shaders::Shader};
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
 use laminar::Config;
+use std::sync::{Arc, Mutex};
 use rg3d_sound::{
     buffer::SoundBufferResource,
     context::SoundContext,
     pool::Handle,
     source::{generic::GenericSourceBuilder, SoundSource},
 };
+use rhai::{Engine, Scope};
 /**
 Struct that hosts the engine functions
 
@@ -71,7 +74,7 @@ impl System {
     pub fn game_objects(&self) -> &GameObjects {
         &self.game_objects
     }
-    pub fn game_objects_mut(&mut self) -> &mut GameObjects {
+    pub fn game_objects_mut(&mut self) -> &mut GameObjects{
         &mut self.game_objects
     }
     pub fn vertex_buffers(&self) -> &HashMap<String, VertexBuffer<Vertex>> {
@@ -328,6 +331,24 @@ impl System {
         self.net.as_ref().unwrap().test_packets();
     }
 
+    pub fn run_script(&mut self, script: String){
+        let mut engine = Engine::new();
+        type GameObjects =HashMap<String, Box<dyn GameObject>>;
+        engine
+        .register_type_with_name::<Box<dyn GameObject>>("GameObject")
+        .register_fn("game_object_from_sprite", GenericGameObject::game_object_from_sprite_script);
 
+        engine
+        .register_type_with_name::<GameObjects>("GameObjects")
+        .register_fn("len", |object: &mut GameObjects| println!("{}",object.len()));
+        
+
+    let mut scope = Scope::new();
+    let game_objects = self.game_objects.game_objects_mut().clone();
+    scope.push("t", game_objects);
+
+    let err = engine.run_with_scope(&mut scope, &script).unwrap();
+    println!("{:?}",err)
+    }
     
 }
