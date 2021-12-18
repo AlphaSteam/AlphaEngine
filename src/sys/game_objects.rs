@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use super::game_object::GameObject;
 
-#[derive(Clone, Debug)]
+#[derive(Clone,Default)]
 pub struct GameObjects{
 
         game_objects: Arc<Mutex<HashMap<String, Box<dyn GameObject>>>>,

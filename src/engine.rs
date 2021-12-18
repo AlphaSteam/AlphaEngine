@@ -50,6 +50,7 @@ impl Engine {
 
                     match event {
                         glutin::event::WindowEvent::CloseRequested => {
+                            private_system.stop( &mut event_manager);
                             *control_flow = glutin::event_loop::ControlFlow::Exit;
                             return;
                         }

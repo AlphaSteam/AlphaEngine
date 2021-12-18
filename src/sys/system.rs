@@ -353,12 +353,11 @@ impl System {
     
     scope.push("game_objects", game_objects.clone());
     
-    let err = engine.run_with_scope(&mut scope, &script).unwrap();
+    let _err = engine.run_with_scope(&mut scope, &script).unwrap();
 
     let new_game_objects: HashMap<String, Box<dyn GameObject>>  = scope.get_value("game_objects").unwrap();
     *self.game_objects.game_objects_mut() = new_game_objects;
 
-    println!("{:?}",err)
     }
     
 }
@@ -372,6 +371,9 @@ pub mod engine_scripts {
         let game_object: GenericGameObject = game_object_dynamic.cast(); 
         game_objects.entry(game_object_id).or_insert(Box::new(game_object));
     }
-   
+    pub fn len(game_objects: HashMap<String, Box<dyn GameObject>>) {
+        println!("{}",game_objects.len());
+    
+        }
    
 }

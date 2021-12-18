@@ -51,43 +51,19 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
 
     setup_sound(system);
 
-    println!("Game objects before script: {}",system.game_objects().game_objects().len());
 
    system.run_script(r#"
 
    let generic_object = game_object_from_sprite(
       [1000.0, 400.0, 0.0],
       "src/sprites/card.png");
-    len(game_objects);
-    add_game_object(game_objects,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",generic_object);
-    len(game_objects);
+    add_game_object(game_objects,"script object",generic_object);
   "#.to_string());
   
-  println!("Game objects after script: {}",system.game_objects().game_objects().len());
     
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
 
-
-
-
-
-    let window_res = system.get_window_resolution();
-    {
-    let mut game_objects = system.game_objects_mut().get_game_object_mut("Sprite 2".to_string());
-    let object_transform = game_objects
-        .get_base_properties_mut()
-        .transform_mut();
-
-    object_transform.rotate(Axis::ZAxis, 10.0);
-    if object_transform.local_position()[0] < window_res[0] {
-        object_transform.translate([1000.0, 0.0, 0.0]);
-        object_transform.scale([2.0, 0.5, 1.0]);
-    } else {
-        object_transform.set_local_position([-1.0, 1.0, 1.0]);
-        object_transform.set_local_scale([1.0, 1.0, 1.0]);
-    }
-    }
     let sound_context = system
         .get_sound_context("Basic context".to_string())
         .unwrap();
@@ -337,6 +313,15 @@ fn setup_game_objects(system: &mut System) {
     let mut sprite = GenericGameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
+        |_system| {
+            
+        },
+|system| {
+            system.game_objects_mut().get_game_object_mut("Sprite 1".to_string());
+        },
+        |_system| {
+            
+        }
     );
     sprite
         .get_base_properties_mut()
@@ -354,17 +339,57 @@ fn setup_game_objects(system: &mut System) {
     let sprite2 = GenericGameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
+        |_system| {
+            
+        },
+|system| {
+    let window_res = system.get_window_resolution();
+    
+    let mut game_objects = system.game_objects_mut().get_game_object_mut("Sprite 2".to_string());
+    let object_transform = game_objects
+        .get_base_properties_mut()
+        .transform_mut();
+
+    object_transform.rotate(Axis::ZAxis, 10.0);
+    if object_transform.local_position()[0] < window_res[0] {
+        object_transform.translate([1000.0, 0.0, 0.0]);
+        object_transform.scale([2.0, 0.5, 1.0]);
+    } else {
+        object_transform.set_local_position([-1.0, 1.0, 1.0]);
+        object_transform.set_local_scale([1.0, 1.0, 1.0]);
+    }
+        },
+        |_system| {
+            
+        }
     );
     system.game_objects_mut().add_game_object("Sprite 2".to_string(), Box::new(sprite2));
 
     let sprite3 = GenericGameObject::game_object_from_sprite(
         [1300.0, 200.0, 0.0],
         "NOT EXISTENT.png".to_string(),
+        |_system| {
+            
+        },
+|system| {
+            system.game_objects_mut().get_game_object_mut("Sprite 1".to_string());
+        },
+        |_system| {
+            
+        }
     );
     system.game_objects_mut().add_game_object("Sprite 3".to_string(), Box::new(sprite3));
 
     let mut card =
-        Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 1);
+        Card::card_from_sprite([400.0, 400.0, 0.0], "src/sprites/card.png".to_string(), 1,  |_system| {
+            
+        },
+|system| {
+            system.game_objects_mut().get_game_object_mut("Sprite 1".to_string());
+        },
+        |_system| {
+            
+        });
     card.get_base_properties_mut()
         .transform_mut()
         .set_local_scale([0.2, 0.2, 1.0]);

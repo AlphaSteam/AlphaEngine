@@ -7,7 +7,9 @@ pub use crate::sys::transform::Transform;
 use dyn_clonable::*;
 use image::io::Reader as ImageReader;
 use image::{DynamicImage, GenericImageView, ImageFormat};
-use rhai::Array;
+use rhai::{Array};
+
+use super::system::System;
 /**
 Struct that represents an object of the game.
 
@@ -96,16 +98,19 @@ impl BaseGameObjectProperties {
 pub trait GmObj: Clone {
     fn get_base_properties(&self) -> &BaseGameObjectProperties;
     fn get_base_properties_mut(&mut self) -> &mut BaseGameObjectProperties;
+    fn start(&mut self) -> fn(&mut System);
+    fn update(&mut self) -> fn(&mut System);
+    fn stop(&mut self) -> fn(&mut System);
 }
 
 #[clonable]
-pub trait GameObject: GmObj + Any + Clone + Debug + Send + Sync {
+pub trait GameObject: GmObj + Any + Clone + Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 impl<T> GameObject for T
 where
-    T: GmObj + Any + Debug + Send + Sync,
+    T: GmObj + Any + Send + Sync,
 { 
     fn as_any(&self) -> &dyn Any {
         self
@@ -116,17 +121,20 @@ where
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct GenericGameObject {
     base_properties: BaseGameObjectProperties,
+    start: fn(&mut System),
+    update: fn(&mut System),
+    stop: fn(&mut System),
 }
 impl GenericGameObject {
-    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture_path: String) -> Self {
+    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture_path: String, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
         let base_properties = BaseGameObjectProperties::new(position, size, mesh, texture_path);
-        GenericGameObject { base_properties }
+        GenericGameObject { base_properties, start, update, stop }
     }
 
-    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String) -> Self {
+    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
         let mesh = Mesh::create_rectangle();
 
         let texture = image::open(texture_path.clone());
@@ -138,7 +146,7 @@ impl GenericGameObject {
         };
         let texture_w = texture.width() as f32;
         let texture_h = texture.height() as f32;
-        GenericGameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path)
+        GenericGameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path, start, update, stop)
     }
     pub fn game_object_from_sprite_script(position: Array, texture_path: &str) -> Self {
         let mesh = Mesh::create_rectangle();
@@ -152,8 +160,10 @@ impl GenericGameObject {
         };
         let texture_w = texture.width() as f32;
         let texture_h = texture.height() as f32;
+
+     
         GenericGameObject::new([position[0].clone_cast::<f64>() as f32,position[1].clone_cast::<f64>() as f32,position[2].clone_cast::<f64>() as f32],
-         [texture_w, texture_h, 1.0], mesh, texture_path.to_string())
+         [texture_w, texture_h, 1.0], mesh, texture_path.to_string(),| _system|{},| _system|{},| _system|{})
     }
 }
 impl GmObj for GenericGameObject {
@@ -162,5 +172,14 @@ impl GmObj for GenericGameObject {
     }
     fn get_base_properties_mut(&mut self) -> &mut BaseGameObjectProperties {
         &mut self.base_properties
+    }
+    fn start(&mut self) -> fn(&mut System) {
+        self.start
+    }
+    fn update(&mut self) -> fn(&mut System) {
+        self.update
+    }
+    fn stop(&mut self) -> fn(&mut System) {
+        self.stop
     }
 }

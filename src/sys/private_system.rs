@@ -48,6 +48,14 @@ impl PrivateSystem {
         old_render: &mut Instant,
     ) {
         let system = &mut self.system;
+        {
+            let mut game_objects = system.game_objects_mut().game_objects_mut().clone();
+            for (_, game_object) in game_objects.iter_mut() {
+                
+                (game_object.update())(system);
+
+            }
+        }
         self.game.update(system, event_manager);
         self.renderer
             .render(&self.display, egui, system, old_render);
