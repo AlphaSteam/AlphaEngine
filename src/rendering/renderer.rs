@@ -23,8 +23,7 @@ impl Renderer {
         }
     }
     pub fn start(&self, display: &Display, system: &mut System) {
-        let game_object_mutex = system.game_objects_mut().clone();
-        let mut game_objects = game_object_mutex;
+        let mut game_objects = system.game_objects_mut().clone();
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {
             let shape = game_object.as_ref().get_base_properties().mesh().vertices();
@@ -162,8 +161,7 @@ impl Renderer {
         let projection = *system.camera().projection().get_projection().as_ref();
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
-        let game_object_mutex = system.game_objects_mut().clone();
-        let mut game_objects = game_object_mutex;
+        let mut game_objects = system.game_objects_mut().clone();
 
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {

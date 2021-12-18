@@ -13,7 +13,6 @@ use crate::{rendering::vertex::Vertex, shaders::Shader};
 use glium::{Display, IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
 use laminar::Config;
-use std::sync::{Arc, Mutex};
 use rg3d_sound::{
     buffer::SoundBufferResource,
     context::SoundContext,
@@ -334,7 +333,7 @@ impl System {
     
     pub fn run_script(&mut self, script: String){
         let mut engine = Engine::new_raw();
-        type GameObjectsHash =Arc<Mutex<HashMap<String, Box<dyn GameObject>>>>;
+        type GameObjectsHash =HashMap<String, Box<dyn GameObject>>;
         engine
         .register_type_with_name::<Box<dyn GameObject>>("GameObject")
         .register_fn("game_object_from_sprite", GenericGameObject::game_object_from_sprite_script);

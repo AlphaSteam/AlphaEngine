@@ -345,7 +345,7 @@ fn setup_game_objects(system: &mut System) {
 |system| {
     let window_res = system.get_window_resolution();
     
-    let mut game_objects = system.game_objects_mut().get_game_object_mut("Sprite 2".to_string());
+    let game_objects = system.game_objects_mut().get_game_object_mut("Sprite 2".to_string());
     let object_transform = game_objects
         .get_base_properties_mut()
         .transform_mut();
