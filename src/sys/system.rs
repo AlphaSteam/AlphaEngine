@@ -20,6 +20,7 @@ use rg3d_sound::{
     pool::Handle,
     source::{generic::GenericSourceBuilder, SoundSource},
 };
+use rhai::plugin::*;
 use rhai::{Engine, Scope};
 /**
 Struct that hosts the engine functions
@@ -330,25 +331,47 @@ impl System {
     pub fn test_packets(&self) {
         self.net.as_ref().unwrap().test_packets();
     }
-
+    
     pub fn run_script(&mut self, script: String){
-        let mut engine = Engine::new();
-        type GameObjects =HashMap<String, Box<dyn GameObject>>;
+        let mut engine = Engine::new_raw();
+        type GameObjectsHash =Arc<Mutex<HashMap<String, Box<dyn GameObject>>>>;
         engine
         .register_type_with_name::<Box<dyn GameObject>>("GameObject")
         .register_fn("game_object_from_sprite", GenericGameObject::game_object_from_sprite_script);
 
         engine
-        .register_type_with_name::<GameObjects>("GameObjects")
-        .register_fn("len", |object: &mut GameObjects| println!("{}",object.len()));
+        .register_type_with_name::<GameObjectsHash>("GameObjects");
+        
+
+        let scripts = exported_module!(engine_scripts);
+        engine.register_global_module(scripts.into());
         
 
     let mut scope = Scope::new();
     let game_objects = self.game_objects.game_objects_mut().clone();
-    scope.push("t", game_objects);
 
+    
+    scope.push("game_objects", game_objects.clone());
+    
     let err = engine.run_with_scope(&mut scope, &script).unwrap();
+
+    let new_game_objects: HashMap<String, Box<dyn GameObject>>  = scope.get_value("game_objects").unwrap();
+    *self.game_objects.game_objects_mut() = new_game_objects;
+
     println!("{:?}",err)
     }
     
+}
+#[export_module]
+pub mod engine_scripts {
+    use std::{collections::HashMap};
+    use rhai::Dynamic;
+    use crate::sys::game_object::{GameObject, GenericGameObject};
+    
+    pub fn add_game_object(game_objects: &mut HashMap<String, Box<dyn GameObject>>,game_object_id: String, game_object_dynamic: Dynamic) {
+        let game_object: GenericGameObject = game_object_dynamic.cast(); 
+        game_objects.entry(game_object_id).or_insert(Box::new(game_object));
+    }
+   
+   
 }

@@ -51,15 +51,19 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
 
     setup_sound(system);
 
+    println!("Game objects before script: {}",system.game_objects().game_objects().len());
+
    system.run_script(r#"
 
    let generic_object = game_object_from_sprite(
       [1000.0, 400.0, 0.0],
       "src/sprites/card.png");
-      len(t)
-  //t.add_game_object("test",generic_object)
+    len(game_objects);
+    add_game_object(game_objects,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",generic_object);
+    len(game_objects);
   "#.to_string());
-
+  
+  println!("Game objects after script: {}",system.game_objects().game_objects().len());
     
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
