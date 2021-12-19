@@ -8,7 +8,6 @@ pub use crate::window::Window;
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface, VertexBuffer};
-use image::GenericImageView;
 
 pub struct Renderer {
     last_fps: [f32; 20],

@@ -90,7 +90,7 @@ fn update(system: &mut System, _event_manager: &mut EventManager) {
 }
 fn stop(_system: &mut System, _event_manager: &mut EventManager) {}
 
-fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId) {
+fn process_inputs(_system: &mut System, key: KeyboardInput, _device_id: DeviceId) {
     let key_code = key.virtual_keycode;
     match key_code {
         None => println!("Key not recognized"),
@@ -233,11 +233,11 @@ fn set_background(system: &mut System){
         },
     );
     let window_resolution = system.get_window_resolution();
+
     sprite
         .base_properties_mut()
         .transform_mut()
-        .set_local_scale([2.0, 2.0, 1.0]);
-   
+        .set_size([window_resolution[0], window_resolution[1], 1.0]);
 
     system.game_objects_mut().add_game_object("Background".to_string(), Box::new(sprite));
 

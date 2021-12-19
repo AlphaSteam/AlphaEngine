@@ -7,7 +7,7 @@ use crate::sys::system::System;
 pub use crate::sys::transform::Transform;
 use dyn_clonable::*;
 use image::io::Reader as ImageReader;
-use image::{DynamicImage, GenericImageView, ImageFormat, ImageBuffer, Rgba, RgbaImage};
+use image::{GenericImageView, ImageFormat, RgbaImage};
 
 /**
 Struct that represents an object of the game.
