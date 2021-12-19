@@ -1,7 +1,8 @@
 
 
-use crate::sys::{game_object::{GameObject, GenericGameObject}, game_objects::{GameObjects}};
 use rhai::{plugin::*, Scope};
+
+use crate::{sys::game_objects::GameObjects, game_objects::{implementations::generic_game_object::GenericGameObject, game_object::GameObject}};
 pub struct ScriptEngine<'a> {
     pub engine: Engine,
     //pub scripts: ScriptFunctions,

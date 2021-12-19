@@ -119,6 +119,7 @@ impl Transform {
         let scale_vec3 = glm::vec3(scale[0], scale[1], scale[2]);
         self.local_scale = glm::matrix_comp_mult(&self.default_scale, &scale_vec3);
     }
+
     /**
     Inmutable access to local scale.
 

@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use super::cam::camera::Camera;
 use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
-use super::game_object::{GameObject, GenericGameObject};
 use super::game_objects::GameObjects;
 pub use crate::game::Game;
+use crate::game_objects::game_object::GameObject;
+use crate::game_objects::implementations::generic_game_object::GenericGameObject;
 use crate::text::{font::Font, render_text::Text};
 pub use crate::window::Window;
 use crate::{audio::audio_engine::AudioEngine, net::Net};
@@ -201,6 +202,12 @@ impl System {
     pub fn framerate_target(&self) -> f32 {
         1.0 / (self.frame_time_target_nanos as f32 / 1_000_000_000.0)
     }
+    pub fn audio_engine(&self)-> &AudioEngine{
+        &self.audio_engine
+    }
+    pub fn audio_engine_mut(&mut self)-> &mut AudioEngine{
+        &mut self.audio_engine
+    }
     pub fn create_sound_context(&self) -> SoundContext {
         self.audio_engine.create_sound_context(&self.camera())
     }
@@ -364,7 +371,6 @@ impl System {
 pub mod engine_scripts {
     use std::{collections::HashMap};
     use rhai::Dynamic;
-    use crate::sys::game_object::{GameObject, GenericGameObject};
     
     pub fn add_game_object(game_objects: &mut HashMap<String, Box<dyn GameObject>>,game_object_id: String, game_object_dynamic: Dynamic) {
         let game_object: GenericGameObject = game_object_dynamic.cast(); 

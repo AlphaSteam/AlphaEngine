@@ -26,11 +26,11 @@ impl Renderer {
         let mut game_objects = system.game_objects_mut().clone();
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {
-            let shape = game_object.as_ref().get_base_properties().mesh().vertices();
+            let shape = game_object.as_ref().base_properties().mesh().vertices();
             let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
             system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
 
-            let indices = game_object.get_base_properties().mesh().indices();
+            let indices = game_object.base_properties().mesh().indices();
             let index_buffer = glium::IndexBuffer::new(
                 display,
                 glium::index::PrimitiveType::TrianglesList,
@@ -39,10 +39,10 @@ impl Renderer {
             .unwrap();
             system.add_index_buffer(game_object_id.clone(), index_buffer);
 
-            let image = game_object.get_base_properties().texture();
+            let image = game_object.base_properties().texture();
             let image_dimensions = image.dimensions();
             let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
-                &image.clone().into_bytes(),
+                &image.clone().into_raw(),
                 image_dimensions,
             );
 
@@ -130,7 +130,7 @@ impl Renderer {
         let fps_raw = (1.0 / (time_since_render.as_nanos() as f32 / 1_000_000_000.0)).round();
         for (_game_object_id, game_object) in system.game_objects_mut().game_objects_mut().iter_mut() {
             game_object
-                .get_base_properties_mut()
+                .base_properties_mut()
                 .transform_mut()
                 .delta_time = 1.0 / fps_raw;
         }
@@ -165,8 +165,9 @@ impl Renderer {
 
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {
-            let model = *game_object
-                .get_base_properties()
+            if game_object.base_properties().mesh().should_render(){
+                let model = *game_object
+                .base_properties()
                 .transform()
                 .get_model_matrix()
                 .as_ref();
@@ -184,6 +185,8 @@ impl Renderer {
                     &params,
                 )
                 .unwrap();
+            }
+           
         }
         egui.paint(&display, &mut target, shapes);
         // Draw text

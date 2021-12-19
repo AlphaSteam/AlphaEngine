@@ -1,4 +1,5 @@
-use alpha_engine::sys::{game_object::{BaseGameObjectProperties, GmObj}, system::System};
+use alpha_engine::{sys::system::System, game_objects::game_object::{BaseGameObjectProperties, GmObj}};
+
 
 #[derive(Clone)]
 pub struct Card {
@@ -35,10 +36,10 @@ impl Card {
     }
 }
 impl GmObj for Card {
-    fn get_base_properties(&self) -> &BaseGameObjectProperties {
+    fn base_properties(&self) -> &BaseGameObjectProperties {
         &self.base_properties
     }
-    fn get_base_properties_mut(&mut self) -> &mut BaseGameObjectProperties {
+    fn base_properties_mut(&mut self) -> &mut BaseGameObjectProperties {
         &mut self.base_properties
     }
     fn start(&mut self) -> fn(&mut System) {

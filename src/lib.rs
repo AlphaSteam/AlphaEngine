@@ -13,3 +13,4 @@ pub mod sys;
 pub mod text;
 pub mod utils;
 mod window;
+pub mod game_objects;

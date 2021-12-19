@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use super::game_object::GameObject;
+
+use crate::game_objects::game_object::GameObject;
 
 #[derive(Clone,Default)]
 pub struct GameObjects{

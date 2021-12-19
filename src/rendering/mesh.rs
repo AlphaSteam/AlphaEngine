@@ -8,6 +8,7 @@ use crate::rendering::vertex::Vertex;
 pub struct Mesh {
     vertices: Vec<Vertex>,
     indices: Vec<u32>,
+    should_render: bool,
 }
 
 impl Mesh {
@@ -15,7 +16,7 @@ impl Mesh {
     Initializer of a Mesh.
     */
     pub fn new(vertices: Vec<Vertex>, indices: Vec<u32>) -> Self {
-        let mesh = Mesh { vertices, indices };
+        let mesh = Mesh { vertices, indices, should_render: true };
         mesh
     }
 
@@ -70,7 +71,19 @@ impl Mesh {
             },
         ];
         let indices = vec![0, 1, 2, 3, 0, 2];
-        let mesh = Mesh { vertices, indices };
+        let mesh = Mesh { vertices, indices, should_render: true };
         mesh
+    }
+     /**
+    Get the render flag. It determines if the mesh should be rendered or not.
+    */
+    pub fn should_render(&self)->bool{
+        self.should_render
+    }
+     /**
+    Set the render flag. It determines if the mesh should be rendered or not.
+    */
+    pub fn set_should_render(&mut self, val: bool){
+        self.should_render = val;
     }
 }
