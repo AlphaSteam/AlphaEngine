@@ -5,7 +5,6 @@ pub use crate::game::Game;
 pub use crate::sys::private_system::PrivateSystem;
 use crate::window::Window;
 use glutin::event_loop::EventLoop;
-
 pub struct Engine {
     event_loop: EventLoop<()>,
     private_system: PrivateSystem,

@@ -1,7 +1,6 @@
 use rhai::Array;
 
-use crate::{game_objects::game_object::{BaseGameObjectProperties, GmObj}, sys::system::System, rendering::mesh::Mesh};
-use crate::image::GenericImageView;
+use crate::{game_objects::game_object::{BaseGameObjectProperties, GmObj}, sys::system::System, rendering::{mesh::Mesh, texture::Texture}};
 
 #[derive(Clone)]
 pub struct GenericGameObject {
@@ -11,41 +10,20 @@ pub struct GenericGameObject {
     stop: fn(&mut System),
 }
 impl GenericGameObject {
-    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture_path: String, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
-        let base_properties = BaseGameObjectProperties::new(position, size, mesh, texture_path);
+    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture: Texture, z_index: i32, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
+        let base_properties = BaseGameObjectProperties::new(position, size, mesh, texture, z_index);
         GenericGameObject { base_properties, start, update, stop }
     }
 
-    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
-        let mesh = Mesh::create_rectangle();
+    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String, z_index: i32, start: fn(&mut System), update: fn(&mut System), stop: fn(&mut System)) -> Self {
 
-        let texture = image::open(texture_path.clone());
-        let texture = match texture {
-            Ok(texture) => texture,
-            Err(_) => {
-                image::load_from_memory(include_bytes!("../../assets/sprites/default.png")).unwrap()
-            }
-        };
-        let texture_w = texture.width() as f32;
-        let texture_h = texture.height() as f32;
-        GenericGameObject::new(position, [texture_w, texture_h, 1.0], mesh, texture_path, start, update, stop)
+        let base_properties = BaseGameObjectProperties::game_object_from_sprite(position, texture_path, z_index);
+        GenericGameObject { base_properties, start, update, stop }
     }
-    pub fn game_object_from_sprite_script(position: Array, texture_path: &str) -> Self {
-        let mesh = Mesh::create_rectangle();
+    pub fn game_object_from_sprite_script(position: Array, texture_path: &str, z_index: i32) -> Self {
 
-        let texture = image::open(texture_path.clone());
-        let texture = match texture {
-            Ok(texture) => texture,
-            Err(_) => {
-                image::load_from_memory(include_bytes!("../../assets/sprites/default.png")).unwrap()
-            }
-        };
-        let texture_w = texture.width() as f32;
-        let texture_h = texture.height() as f32;
-
-     
-        GenericGameObject::new([position[0].clone_cast::<f64>() as f32,position[1].clone_cast::<f64>() as f32,position[2].clone_cast::<f64>() as f32],
-         [texture_w, texture_h, 1.0], mesh, texture_path.to_string(),| _system|{},| _system|{},| _system|{})
+        let base_properties = BaseGameObjectProperties::game_object_from_sprite([position[0].clone_cast::<f64>() as f32,position[1].clone_cast::<f64>() as f32,position[2].clone_cast::<f64>() as f32], texture_path.to_string(), z_index);
+        GenericGameObject { base_properties,start:| _system|{},update:| _system|{},stop:| _system|{} }
     }
 }
 impl GmObj for GenericGameObject {

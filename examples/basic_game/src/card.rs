@@ -20,9 +20,9 @@ impl Card {
             stop,
         }
     }
-    pub fn card_from_sprite(position: [f32; 3], texture_path: String, cost: i32, start: fn(&mut System),update: fn(&mut System), stop: fn(&mut System)) -> Self {
+    pub fn card_from_sprite(position: [f32; 3], texture_path: String, cost: i32,z_index: i32, start: fn(&mut System),update: fn(&mut System), stop: fn(&mut System)) -> Self {
         let base_properties =
-            BaseGameObjectProperties::game_object_from_sprite(position, texture_path);
+            BaseGameObjectProperties::game_object_from_sprite(position, texture_path,z_index);
         Card {
             base_properties,
             cost,

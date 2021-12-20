@@ -1,3 +1,5 @@
+use sheep::SerializedSpriteSheet;
+
 use crate::rendering::vertex::Vertex;
 
 /**

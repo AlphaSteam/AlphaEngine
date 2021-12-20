@@ -13,6 +13,7 @@ pub struct Transform {
     local_scale: Vec3,
     pub default_scale: Vec3,
     pub delta_time: f32,
+    z_index: i32,
 }
 
 impl Transform {
@@ -33,6 +34,7 @@ impl Transform {
             local_scale: scale,
             default_scale: scale,
             delta_time: 0.0,
+            z_index: 0,
         };
 
         component
@@ -238,5 +240,12 @@ impl Transform {
         let forward = self.get_forward_vector();
         let look_at = glm::look_at(&self.local_position, &(self.local_position + forward), &up);
         look_at
+    }
+    pub fn z_index(&self)->i32{
+         self.z_index
+    }
+
+    pub fn set_z_index(&mut self, z_index: i32){
+        self.z_index = z_index;
     }
 }

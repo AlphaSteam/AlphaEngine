@@ -7,11 +7,11 @@ use super::game_objects::GameObjects;
 pub use crate::game::Game;
 use crate::game_objects::game_object::GameObject;
 use crate::game_objects::implementations::generic_game_object::GenericGameObject;
-use crate::text::{font::Font, render_text::Text};
+use crate::text::{render_text::Text};
 pub use crate::window::Window;
 use crate::{audio::audio_engine::AudioEngine, net::Net};
 use crate::{rendering::vertex::Vertex, shaders::Shader};
-use glium::{Display, IndexBuffer, VertexBuffer};
+use glium::{ IndexBuffer, VertexBuffer};
 use glutin::dpi::PhysicalSize;
 use laminar::Config;
 use rg3d_sound::{
@@ -22,6 +22,8 @@ use rg3d_sound::{
 };
 use rhai::plugin::*;
 use rhai::{Engine, Scope};
+use glium::backend::glutin::Display;
+
 /**
 Struct that hosts the engine functions
 
@@ -35,7 +37,7 @@ pub struct System {
     camera: Camera,
     display: Display,
     current_shader: Shader,
-    fonts: HashMap<String, Font>,
+    //fonts: HashMap<String, Font>,
     text: Vec<Text>,
     text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
@@ -54,7 +56,6 @@ impl System {
             -10.0,
             10.0,
         );
-
         Self {
             game_objects: GameObjects::new(HashMap::new()),
             vertex_buffers: HashMap::new(),
@@ -63,7 +64,7 @@ impl System {
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
             display: display.clone(),
             current_shader: Shader::Basic,
-            fonts: HashMap::new(),
+            //fonts: HashMap::new(),
             text: Vec::new(),
             text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
@@ -158,16 +159,16 @@ impl System {
         &self.current_shader
     }
 
-    pub fn add_font(&mut self, font_name: &str, font_path: &str) {
+    /* pub fn add_font(&mut self, font_name: &str, font_path: &str) {
         let font = Font::new(font_path, &self.display);
         self.fonts.insert(font_name.to_string(), font);
-    }
-    pub fn fonts(&self) -> &HashMap<String, Font> {
+    } */
+    /* pub fn fonts(&self) -> &HashMap<String, Font> {
         &self.fonts
-    }
-    pub fn fonts_mut(&mut self) -> &mut HashMap<String, Font> {
+    } */
+  /*   pub fn fonts_mut(&mut self) -> &mut HashMap<String, Font> {
         &mut self.fonts
-    }
+    } */
     pub fn text(&self) -> &Vec<Text> {
         &self.text
     }

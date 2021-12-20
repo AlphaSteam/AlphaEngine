@@ -14,3 +14,4 @@ pub mod text;
 pub mod utils;
 mod window;
 pub mod game_objects;
+pub mod animation;

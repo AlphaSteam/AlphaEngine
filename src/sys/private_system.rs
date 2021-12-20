@@ -5,8 +5,7 @@ pub use crate::game::Game;
 pub use crate::rendering::renderer::Renderer;
 pub use crate::window::Window;
 use egui_glium::EguiGlium;
-use glium::Display;
-
+use glium::backend::glutin::Display;
 use super::system::System;
 
 /**

@@ -4,7 +4,7 @@ version = "0.1.0"
 license = "MIT"
 authors = ["Sebastian Alfaro <sebastian.alfaro@outlook.cl>"]
 description= "Game engine for 2D games that uses OpenGl for it's rendering."
-edition = "2021"
+edition = "2018"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -16,12 +16,15 @@ nalgebra-glm = "*"
 image = "*"
 relative-path = "1.5.0"
 ab_glyph = "0.2.11"
-egui="0.14.0"
-egui_glium = "0.14.0"
+egui="0.15.0"
+egui_glium = "0.15.0"
 rg3d-sound = "0.25.0"
 dyn-clonable = "*"
+crossbeam-channel = "*"
 fontdue = "0.6.2"
 laminar = "0.5.0"
-crossbeam-channel = "0.5.1"
-rhai =  { version = "1.3.0", features = [ ] }
+rhai =  { version = "1.3.0", features = ["only_i32"] }
 owning_ref = "0.4.1"
+sheep = "0.3.0"
+ron = "0.7.0"
+itertools = "0.10.2"

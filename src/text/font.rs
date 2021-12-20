@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use super::character::Character;
 use ab_glyph::Glyph;
 use ab_glyph::{point, Font as abFont, FontRef, ScaleFont};
-use glium::{texture::SrgbTexture2d, Display};
 use image::{EncodableLayout, Rgb, RgbImage};
-#[derive(Debug)]
+use glium::backend::glutin::Display;
+use glium::texture::SrgbTexture2d;
 pub struct Font {
     characters: HashMap<char, Character>,
 }

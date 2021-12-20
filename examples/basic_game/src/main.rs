@@ -20,7 +20,7 @@ use alpha_engine::audio::audio_engine::source::spatial::SpatialSourceBuilder;
 use alpha_engine::audio::audio_engine::source::{SoundSource, Status};
 use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
-use alpha_engine::game_objects::game_object::GmObj;
+use alpha_engine::game_objects::game_object::{GmObj, BaseGameObjectProperties};
 use alpha_engine::game_objects::implementations::generic_game_object::GenericGameObject;
 use alpha_engine::helpers::*;
 use alpha_engine::scripting::ScriptEngine;
@@ -54,7 +54,7 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
 
    let generic_object = game_object_from_sprite(
       [1000.0, 400.0, 0.0],
-      "src/sprites/card.png");
+      "src/sprites/card.png", 0);
     add_game_object(game_objects,"script object",generic_object);
   "#.to_string());
     
@@ -192,6 +192,7 @@ fn setup_game_objects(system: &mut System) {
     let mut sprite = GenericGameObject::game_object_from_sprite(
         [500.0, 200.0, 0.0],
         "src/sprites/placeholder.png".to_string(),
+        0,
         |_system| {
             
         },
@@ -220,8 +221,8 @@ fn set_background(system: &mut System){
   
     let mut sprite = GenericGameObject::game_object_from_sprite(
         [0.0, 0.0, 0.0],
-        "src/sprites/bg.png".to_string()
-        ,
+        "src/sprites/bg.png".to_string(),
+        -9999,
         |_system| {
             
         },
@@ -231,6 +232,7 @@ fn set_background(system: &mut System){
         |_system| {
             
         },
+        
     );
     let window_resolution = system.get_window_resolution();
 
@@ -240,6 +242,27 @@ fn set_background(system: &mut System){
         .set_size([window_resolution[0], window_resolution[1], 1.0]);
 
     system.game_objects_mut().add_game_object("Background".to_string(), Box::new(sprite));
+
+
+    let sprite = GenericGameObject::game_object_from_sprite(
+        [1000.0, 0.0, 0.0],
+        "src/sprites/Characters/Skeleton/Idle".to_string(),
+        1,
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        
+    );
+
+
+    system.game_objects_mut().add_game_object("Skeleton".to_string(), Box::new(sprite));
+
 
 }
 fn main() {

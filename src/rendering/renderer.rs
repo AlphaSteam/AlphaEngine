@@ -7,7 +7,10 @@ use crate::sys::{system::System};
 pub use crate::window::Window;
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
-use glium::{uniform, BackfaceCullingMode, Blend, Display, Surface, VertexBuffer};
+use glium::{uniform, BackfaceCullingMode, Blend, Surface};
+use glium::backend::glutin::Display;
+use itertools::Itertools;
+
 
 pub struct Renderer {
     last_fps: [f32; 20],
@@ -30,7 +33,7 @@ impl Renderer {
             system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
 
             let indices = game_object.base_properties().mesh().indices();
-            let index_buffer = glium::IndexBuffer::new(
+            let index_buffer = glium::IndexBuffer::dynamic(
                 display,
                 glium::index::PrimitiveType::TrianglesList,
                 &indices,
@@ -38,7 +41,7 @@ impl Renderer {
             .unwrap();
             system.add_index_buffer(game_object_id.clone(), index_buffer);
 
-            let image = game_object.base_properties().texture();
+            let image = game_object.base_properties().texture().texture();
             let image_dimensions = image.dimensions();
             let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
                 &image.clone().into_raw(),
@@ -48,7 +51,7 @@ impl Renderer {
             let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
             system.add_texture(game_object_id.clone(), texture);
         }
-        let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
+        /* let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
 
         let texts = system.text_mut().clone();
         for txt in texts {
@@ -91,7 +94,7 @@ impl Renderer {
         }
         for text_buffer in text_buffers {
             system.add_text_buffer(text_buffer.0, text_buffer.1);
-        }
+        } */
     }
     pub fn render_gui(
         display: &Display,
@@ -99,7 +102,7 @@ impl Renderer {
         fps: f32,
         frame_time: Duration,
     ) -> (bool, Vec<ClippedShape>) {
-        egui.begin_frame(&display);
+        egui.begin_frame(display);
 
         egui::Window::new("Debug").show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
@@ -145,7 +148,6 @@ impl Renderer {
         .unwrap();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         let params = glium::DrawParameters {
-            // GO BACK TO THIS
             depth: glium::Depth {
                 test: glium::draw_parameters::DepthTest::Overwrite,
                 write: true,
@@ -161,9 +163,19 @@ impl Renderer {
 
         let view = *system.camera().transform().get_view_matrix().as_ref();
         let mut game_objects = system.game_objects_mut().clone();
-
         let game_objects = game_objects.game_objects_mut();
-        for (game_object_id, game_object) in game_objects.iter() {
+
+        for (game_object_id, game_object) in game_objects.iter().sorted_by(|a,b|
+            {
+            let first_z_index = &a.1.base_properties()
+            .transform().z_index();
+
+            let second_z_index = &b.1.base_properties()
+            .transform().z_index();
+            Ord::cmp(first_z_index,second_z_index)
+        }
+       
+    ) {
             if game_object.base_properties().mesh().should_render(){
                 let model = *game_object
                 .base_properties()
@@ -174,7 +186,7 @@ impl Renderer {
             let vertex_buffer = &system.vertex_buffers()[game_object_id];
             let index_buffer = &system.index_buffers()[game_object_id];
             let diffuse_texture = &system.textures()[game_object_id];
-
+        
             target
                 .draw(
                     vertex_buffer,
