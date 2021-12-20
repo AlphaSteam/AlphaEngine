@@ -6,6 +6,7 @@
 /examples/basic_game/target
 /examples/basic_game/target/
 /examples/basic_game/src/basic_game
+/examples/basic_game/basic_game
 /examples/network_example/target
 /examples/network_example/target/
 # Remove Cargo.lock from gitignore if creating an executable, leave it for libraries
