@@ -11,7 +11,7 @@ use crate::sys::system::System;
 pub use crate::sys::transform::Transform;
 use dyn_clonable::*;
 use image::{RgbaImage};
-use sheep::{InputSprite, AmethystFormat, MaxrectsPacker, AmethystNamedFormat};
+use sheep::{InputSprite, AmethystFormat, MaxrectsPacker};
 use crate::helpers::image::load_texture;
 
 /**

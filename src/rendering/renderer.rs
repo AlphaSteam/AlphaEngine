@@ -5,6 +5,7 @@ use std::time::{Duration, Instant};
 pub use crate::rendering::vertex::Vertex;
 use crate::sys::{system::System};
 pub use crate::window::Window;
+use egui::{Frame, Color32};
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Surface};
@@ -105,8 +106,9 @@ impl Renderer {
         frame_time: Duration,
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(display);
-
-        egui::Window::new("Debug").show(egui.ctx(), |ui| {
+        let mut frame = Frame::default();
+        frame.fill = Color32::TRANSPARENT;
+        egui::Window::new("Debug").frame(frame).show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
             ui.label(format!("Frame time: {:?}", frame_time))
         });
@@ -114,6 +116,8 @@ impl Renderer {
         let (needs_repaint, shapes) = egui.end_frame(&display);
         return (needs_repaint, shapes);
     }
+
+    
     pub fn render(
         &mut self,
         display: &Display,
@@ -139,7 +143,6 @@ impl Renderer {
                 .transform_mut()
                 .delta_time = delta_time;
         }
-        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
         let mut target = display.draw();
 
         let program = glium::Program::from_source(
@@ -209,6 +212,7 @@ impl Renderer {
             }
            
         }
+        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
         egui.paint(&display, &mut target, shapes);
         // Draw text
         /* let program = glium::Program::from_source(

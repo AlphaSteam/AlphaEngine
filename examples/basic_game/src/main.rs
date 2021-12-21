@@ -202,7 +202,7 @@ fn set_characters(system: &mut System){
     sprites.insert("Attack".to_string(), "src/sprites/Characters/Skeleton/Attack".to_string());
 
     let mut skeleton = GenericGameObject::game_object_from_sprites(
-        [1000.0, 0.0, 0.0],
+        [1500.0, 70.0, 0.0],
         sprites,
         "Idle".to_string(),
         1,
@@ -229,7 +229,7 @@ fn set_characters(system: &mut System){
     sprites.insert("Idle".to_string(), "src/sprites/Characters/Wizard/Idle".to_string());
     sprites.insert("Attack1".to_string(), "src/sprites/Characters/Wizard/Attack1".to_string());
     let mut wizard = GenericGameObject::game_object_from_sprites(
-        [1000.0, 400.0, 0.0],
+        [200.0, 120.0, 0.0],
         sprites,
         "Idle".to_string(),
         19999,
