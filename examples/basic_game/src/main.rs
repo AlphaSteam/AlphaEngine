@@ -61,7 +61,11 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     
     */
   "#.to_string());
-    
+  system.render_text("Test".to_string(),[300.0,300.0], 200000.0, [100,200,100]);
+  system.render_text("Test2".to_string(),[1000.0,300.0], 1000.0, [200,255,0]);
+
+  system.render_text("aaaaaaaaaaa".to_string(),[100.0,300.0], 1000.0, [200,255,0]);
+
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
 

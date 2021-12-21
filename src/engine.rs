@@ -32,6 +32,7 @@ impl Engine {
         let mut event_manager = self.event_manager.clone();
         let display = private_system.display().clone();
         let mut egui = egui_glium::EguiGlium::new(&display);
+    
         let mut old_render = Instant::now();
         let mut old_frame = Instant::now();
         let mut remaining_time = private_system.system().frame_time_target_nanos();

@@ -4,8 +4,9 @@ use std::time::{Duration, Instant};
 
 pub use crate::rendering::vertex::Vertex;
 use crate::sys::{system::System};
+use crate::text::render_text::Text;
 pub use crate::window::Window;
-use egui::{Frame, Color32};
+use egui::{Frame, Color32, FontDefinitions, TextStyle, FontFamily, Style};
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Surface};
@@ -54,65 +55,40 @@ impl Renderer {
             let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
             system.add_texture(game_object_id.clone(), texture);
         }
-        /* let mut text_buffers = Vec::<(VertexBuffer<Vertex>, char)>::new();
-
-        let texts = system.text_mut().clone();
-        for txt in texts {
-            let text = &txt.text;
-            let x = &txt.position[0];
-            let y = &txt.position[1];
-
-            for c in text.chars() {
-                let font = &system.fonts()[&txt.font];
-                let char = &font.characters()[&c];
-
-                let xpos = x + char.bearing[0] * txt.scale[0];
-                let ypos = y - (char.size.1 as f32 - char.bearing[1]) * txt.scale[1];
-
-                let w = char.size.0 as f32 * txt.scale[0];
-                let h = char.size.1 as f32 * txt.scale[1];
-
-                let vertices = vec![
-                    Vertex {
-                        position: [xpos, ypos + h, 0.0],
-                        tex_coords: [0.0, 0.0],
-                    },
-                    Vertex {
-                        position: [xpos, ypos, 0.0],
-                        tex_coords: [0.0, 1.0],
-                    },
-                    Vertex {
-                        position: [xpos + w, ypos, 0.0],
-                        tex_coords: [1.0, 1.0],
-                    },
-                    Vertex {
-                        position: [xpos + w, ypos + h, 0.0],
-                        tex_coords: [1.0, 0.0],
-                    },
-                ];
-
-                let vertex_buffer = glium::VertexBuffer::new(display, &vertices).unwrap();
-                text_buffers.push((vertex_buffer, c));
-            }
-        }
-        for text_buffer in text_buffers {
-            system.add_text_buffer(text_buffer.0, text_buffer.1);
-        } */
+  
+      
     }
     pub fn render_gui(
         display: &Display,
         egui: &mut EguiGlium,
         fps: f32,
         frame_time: Duration,
+        texts: Vec<Text>
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(display);
-        let mut frame = Frame::default();
-        frame.fill = Color32::TRANSPARENT;
-        egui::Window::new("Debug").frame(frame).show(egui.ctx(), |ui| {
+        
+        egui::Window::new("Debug").show(egui.ctx(), |ui| {
             ui.label(format!("Fps: {}", fps));
             ui.label(format!("Frame time: {:?}", frame_time))
         });
 
+        let mut transparent_frame = Frame::default();
+        transparent_frame.fill = Color32::TRANSPARENT;
+        for (i, txt) in texts.iter().enumerate() {
+            let pos_x = txt.position[0];
+            let pos_y = txt.position[1];
+            let r = txt.color[0];
+            let g = txt.color[1];
+            let b = txt.color[2];
+
+        
+
+       
+            egui::Area::new(format!("Text {}", i)).fixed_pos(egui::pos2(pos_x, pos_y)).show(egui.ctx(), |ui| {
+              
+                ui.add(egui::Label::new(format!("{}", txt.text)).text_style(TextStyle::Heading).text_color(Color32::from_rgb(r,g,b)));
+            });
+        }
         let (needs_repaint, shapes) = egui.end_frame(&display);
         return (needs_repaint, shapes);
     }
@@ -212,53 +188,11 @@ impl Renderer {
             }
            
         }
-        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
+        let texts = system.text_mut().clone();
+
+        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render,texts);
         egui.paint(&display, &mut target, shapes);
-        // Draw text
-        /* let program = glium::Program::from_source(
-            display,
-            Shader::Text.source_code().0.as_str(),
-            Shader::Text.source_code().1.as_str(),
-            None,
-        )
-        .unwrap();
-        let window_resolution = system.get_window_resolution();
-        let projection = *ProjectionOrtho::new(
-            0.0,
-            window_resolution[0],
-            0.0,
-            window_resolution[1],
-            -1.0,
-            1.0,
-        )
-        .get_projection()
-        .as_ref();
-        for n in 0..system.text().len() {
-            let vertex_buffer = &system.text_buffers()[n].0;
-
-            let index_buffer = &glium::IndexBuffer::new(
-                display,
-                glium::index::PrimitiveType::TrianglesList,
-                &vec![0_u32, 1, 2, 3, 0, 2],
-            )
-            .unwrap();
-            let text = &system.text()[n];
-            let c = &system.text_buffers()[n].1;
-            let font = &system.fonts()[&text.font];
-            let char = &font.characters()[&c];
-
-            let texture = &char.texture;
-
-            target
-                .draw(
-                    vertex_buffer,
-                    index_buffer,
-                    &program,
-                    &uniform! { projection: projection, text: texture, text_colors: text.color},
-                    &params,
-                )
-                .unwrap();
-        } */
+        
         target.finish().unwrap();
     }
     pub fn stop(&self) {}

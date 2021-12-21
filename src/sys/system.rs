@@ -37,9 +37,7 @@ pub struct System {
     camera: Camera,
     display: Display,
     current_shader: Shader,
-    //fonts: HashMap<String, Font>,
     text: Vec<Text>,
-    text_buffers: Vec<(VertexBuffer<Vertex>, char)>,
     frame_time_target_nanos: u64,
     audio_engine: AudioEngine,
     net: Option<Net>,
@@ -64,9 +62,7 @@ impl System {
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
             display: display.clone(),
             current_shader: Shader::Basic,
-            //fonts: HashMap::new(),
             text: Vec::new(),
-            text_buffers: Vec::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
             audio_engine: AudioEngine::new(),
             net: None,
@@ -175,21 +171,14 @@ impl System {
     pub fn text_mut(&mut self) -> &mut Vec<Text> {
         &mut self.text
     }
-    pub fn add_text_buffer(&mut self, vertex_buffer: VertexBuffer<Vertex>, texture: char) {
-        self.text_buffers.push((vertex_buffer, texture))
-    }
-    pub fn text_buffers(&self) -> &Vec<(VertexBuffer<Vertex>, char)> {
-        &self.text_buffers
-    }
     pub fn render_text(
         &mut self,
         text: String,
-        font: String,
         position: [f32; 2],
-        scale: [f32; 2],
-        color: [f32; 3],
+        scale: f32,
+        color: [u8; 3],
     ) {
-        let text = Text::new(text, font, position, scale, color);
+        let text = Text::new(text, position, scale, color);
         self.text.push(text);
     }
     pub fn set_framerate_target(&mut self, framerate: f32) {
