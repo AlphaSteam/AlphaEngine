@@ -1,15 +1,17 @@
+use std::collections::HashMap;
 use std::{any::Any, path::PathBuf};
 use std::fs::read_dir;
 use std::io::Error;
 use std::fmt::Debug;
 
+use crate::animation::animations::Animations;
 pub use crate::rendering::mesh::Mesh;
 use crate::rendering::texture::Texture;
 use crate::sys::system::System;
 pub use crate::sys::transform::Transform;
 use dyn_clonable::*;
 use image::{RgbaImage};
-use sheep::{InputSprite, AmethystFormat, SimplePacker};
+use sheep::{InputSprite, AmethystFormat, MaxrectsPacker, AmethystNamedFormat};
 use crate::helpers::image::load_texture;
 
 /**
@@ -21,12 +23,19 @@ Struct that represents an object of the game.
 
 pub struct BaseGameObjectProperties {
     transform: Transform,
-    mesh: Mesh,
-    texture: Texture,
+    meshes: HashMap<String, Mesh>,
+    animations: Animations,
+    should_render: bool,
 }
 
 impl BaseGameObjectProperties {
-    pub fn new(position: [f32; 3], size: [f32; 3], mesh: Mesh, texture: Texture, z_index: i32) -> Self {
+    pub fn new(position: [f32; 3],
+        size: [f32; 3],
+        meshes: HashMap<String, Mesh>,
+        animations: Animations,
+        z_index: i32,
+        should_render: bool,
+    ) -> Self {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
         let scale_vec3 = glm::vec3(size[0], size[1], size[2]);
         let mut transform = Transform::new(position_vec3, scale_vec3);
@@ -34,48 +43,60 @@ impl BaseGameObjectProperties {
       
         let game_object = Self {
             transform,
-            mesh,
-            texture,
+            meshes,
+            animations,
+            should_render,
         };
 
         game_object
     }
-    pub fn game_object_from_sprite(position: [f32; 3], texture_path: String, z_index: i32) -> Self {
-        let mesh = Mesh::create_rectangle();
-        let mut is_sprite_sheet = false;
+
+    pub fn game_object_from_sprites(
+        position: [f32; 3],
+        texture_paths: HashMap<String,String>,
+        default_texture: String, 
+        z_index: i32,
+        should_render: bool,
+    ) -> Self {
+        
+        let mut meshes : HashMap<String, Mesh> = HashMap::new();
+        let mut textures : HashMap<String, Texture> = HashMap::new();
+        
+        for (texture_name,texture_path) in texture_paths.iter(){
         let mut sprites: Vec<InputSprite> = Vec::new();
+        let mut texture_file=RgbaImage::new(0,0);
+        let mut is_sprite_sheet = false;
         let mut texture_w=0.0;
         let mut texture_h=0.0;
 
-        let mut texture_file=RgbaImage::new(0,0);
         match read_dir(texture_path.clone()){
             Ok(entries) => {
                 is_sprite_sheet = true;
                 let mut entries = entries.map(|res| res.map(|e| e.path()))
                 .collect::<Result<Vec<_>, Error>>().unwrap();
-                entries.sort();
+                entries.sort_by(|name_a, name_b|{
+                    Ord::cmp(name_a,name_b).reverse()
+
+                });
 
 
                 for entry in entries{
                     let file_name = entry.file_stem().unwrap();
+
                     let folder_name_buf = PathBuf::from(texture_path.clone());
                     let folder_name = folder_name_buf.file_stem().unwrap();
-                    println!("Comparison: {:?}, {:?}", file_name, folder_name);
                     if file_name != folder_name {
                         let sprite = load_texture(entry.to_str().unwrap().to_string());
-                        texture_w = sprite.width() as f32;
-                        texture_h = sprite.height() as f32;
+                        
                         let input_sprite = InputSprite{
                             bytes: sprite.as_raw().to_vec(),
                             dimensions: sprite.dimensions()
                         };
-                        sprites.push(input_sprite)
-                    }
-                   
+                        sprites.push(input_sprite);
+                        texture_w = sprite.width() as f32;
+                        texture_h = sprite.height() as f32;
+                    }  
                 }
-
-
-
             },
             Err(_) => {
                 let sprite = load_texture(texture_path.clone());
@@ -89,18 +110,14 @@ impl BaseGameObjectProperties {
                 texture_file = sprite;
             },
         }
-       
-        
-        let results = sheep::pack::<SimplePacker>(sprites, 4, Default::default());
+        let results = sheep::pack::<MaxrectsPacker>(sprites, 4, Default::default());
         let sprite_sheet = results
         .into_iter()
         .next()
-        .expect("Should have returned a spritesheet");
+        .expect("Should've returned a spritesheet");
         let meta = sheep::encode::<AmethystFormat>(&sprite_sheet, ());
-        // Lastly, we serialize the meta info using serde. This can be any format
-        // you want, just implement the trait and pass it to encode.
-        //let meta_str = ron::ser::to_string(&meta).expect("Failed to encode meta file");
-        let mut save_path=" ".to_string();
+
+        let mut _save_path=" ".to_string();
         
         if is_sprite_sheet{
             let outbuf = image::RgbaImage::from_vec(
@@ -113,28 +130,37 @@ impl BaseGameObjectProperties {
             
             let mut tmp_save_path = directory_path_buf.join(directory_name);
             tmp_save_path.set_extension("png");
-            save_path = tmp_save_path.to_str().unwrap().to_string().clone();
-            println!("Texture path: {:?}",save_path);
+            _save_path = tmp_save_path.to_str().unwrap().to_string().clone();
 
-            outbuf.save(save_path.clone()).expect("Failed to save image");
+            outbuf.save(_save_path).expect("Failed to save image");
 
             texture_file = outbuf;
         }
      
-      /*  if !is_sprite_sheet{
-           save_path = texture_path.clone();
-       } */
-       let texture = Texture::new(texture_file,meta);
+     
+       let mesh = Mesh::create_rectangle_animated(&meta,0);
 
-        BaseGameObjectProperties::new(position, [texture_w, texture_h, 1.0], mesh, texture, z_index)
+       let texture = Texture::new(texture_file,(texture_w, texture_h),meta);
+
+       meshes.insert(texture_name.clone(), mesh);
+       textures.insert(texture_name.clone(), texture);
+        }
+        
+        let default_texture_obj = textures[&default_texture].clone();
+        let texture_w = default_texture_obj.individual_sprite_size().0 as f32;
+        let texture_h = default_texture_obj.individual_sprite_size().1 as f32;
+
+        let mut animations = Animations::new(textures);
+        *animations.current_animation_mut() = default_texture;
+        BaseGameObjectProperties::new(position, [texture_w, texture_h, 1.0], meshes, animations, z_index,should_render)
     }
    
-    pub fn mesh(&self) -> &Mesh {
-        &self.mesh
+    pub fn meshes(&self) -> &HashMap<String, Mesh> {
+        &self.meshes
     }
 
-    pub fn mesh_mut(&mut self) -> &mut Mesh {
-        &mut self.mesh
+    pub fn meshes_mut(&mut self) -> &mut HashMap<String, Mesh> {
+        &mut self.meshes
     }
     pub fn transform(&self) -> &Transform {
         &self.transform
@@ -144,12 +170,24 @@ impl BaseGameObjectProperties {
         &mut self.transform
     }
 
-    pub fn texture(&self) -> &Texture {
-        &self.texture
+    pub fn animations(&self) -> &Animations {
+        &self.animations
     }
 
-    pub fn texture_mut(&mut self) -> &mut Texture {
-        &mut self.texture
+    pub fn animations_mut(&mut self) -> &mut Animations {
+        &mut self.animations
+    }
+      /**
+    Get the render flag. It determines if the mesh should be rendered or not.
+    */
+    pub fn should_render(&self)->bool{
+        self.should_render
+    }
+     /**
+    Set the render flag. It determines if the mesh should be rendered or not.
+    */
+    pub fn set_should_render(&mut self, val: bool){
+        self.should_render = val;
     }
 }
 

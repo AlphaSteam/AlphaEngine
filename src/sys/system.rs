@@ -344,7 +344,7 @@ impl System {
         type GameObjectsHash =HashMap<String, Box<dyn GameObject>>;
         engine
         .register_type_with_name::<Box<dyn GameObject>>("GameObject")
-        .register_fn("game_object_from_sprite", GenericGameObject::game_object_from_sprite_script);
+        .register_fn("game_object_from_sprites", GenericGameObject::game_object_from_sprites_script);
 
         engine
         .register_type_with_name::<GameObjectsHash>("GameObjects");
@@ -377,9 +377,9 @@ pub mod engine_scripts {
         let game_object: GenericGameObject = game_object_dynamic.cast(); 
         game_objects.entry(game_object_id).or_insert(Box::new(game_object));
     }
-    pub fn len(game_objects: HashMap<String, Box<dyn GameObject>>) {
+    pub fn len(game_objects: HashMap<String, Box<dyn GameObject>>)->usize {
         println!("{}",game_objects.len());
-    
+        game_objects.len()
         }
    
 }

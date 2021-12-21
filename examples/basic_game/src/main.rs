@@ -22,8 +22,7 @@ use alpha_engine::event::event_manager::EventManager;
 use alpha_engine::event::{self, DeviceEvent, DeviceId, KeyboardInput, VirtualKeyCode};
 use alpha_engine::game_objects::game_object::{GmObj, BaseGameObjectProperties};
 use alpha_engine::game_objects::implementations::generic_game_object::GenericGameObject;
-use alpha_engine::helpers::*;
-use alpha_engine::scripting::ScriptEngine;
+use alpha_engine::helpers::math::array3_to_vec3;
 use alpha_engine::{engine, game, shaders::Shader, sys, text};
 use engine::Engine;
 use game::Game;
@@ -32,6 +31,7 @@ use sys::{
     cam::projection_perspective::ProjectionPerspective, fullscreen::Fullscreen,
     system::System,
 };
+use std::collections::HashMap;
 
 use crate::card::Card;
 fn start(system: &mut System, event_manager: &mut EventManager) {
@@ -52,10 +52,14 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
 
    system.run_script(r#"
 
-   let generic_object = game_object_from_sprite(
+    /* let generic_object = game_object_from_sprites(
       [1000.0, 400.0, 0.0],
-      "src/sprites/card.png", 0);
+      #{"Base":"src/sprites/card.png"},
+      "Base",
+       0);
     add_game_object(game_objects,"script object",generic_object);
+    
+    */
   "#.to_string());
     
 }
@@ -188,41 +192,73 @@ fn setup_sound(system: &mut System) {
         .add_input(EffectInput::direct(handle));
 }
 fn setup_game_objects(system: &mut System) {
-    
-    let mut sprite = GenericGameObject::game_object_from_sprite(
-        [500.0, 200.0, 0.0],
-        "src/sprites/placeholder.png".to_string(),
-        0,
-        |_system| {
-            
-        },
-|system| {
-            system.game_objects_mut().get_game_object_mut("Sprite 1".to_string());
-        },
-        |_system| {
-            
-        }
-    );
-    sprite
-        .base_properties_mut()
-        .transform_mut()
-        .set_local_scale([1.0, 1.5, 1.0]);
-    sprite
-        .base_properties_mut()
-        .transform_mut()
-        .rotate(Axis::ZAxis, -90.0);
-    
 
-    system.game_objects_mut().add_game_object("Sprite 1".to_string(), Box::new(sprite));
     set_background(system);
-  
+    set_characters(system);
+}
+fn set_characters(system: &mut System){
+    let mut sprites = HashMap::new();
+    sprites.insert("Idle".to_string(), "src/sprites/Characters/Skeleton/Idle".to_string());
+    sprites.insert("Attack".to_string(), "src/sprites/Characters/Skeleton/Attack".to_string());
+
+    let mut skeleton = GenericGameObject::game_object_from_sprites(
+        [1000.0, 0.0, 0.0],
+        sprites,
+        "Idle".to_string(),
+        1,
+        true,
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        
+    );
+
+    skeleton.base_properties_mut().transform_mut().set_local_scale([4.0, 4.0, 1.0]);
+
+    system.game_objects_mut().add_game_object("Skeleton".to_string(), Box::new(skeleton));
+
+
+
+    let mut sprites = HashMap::new();
+    sprites.insert("Idle".to_string(), "src/sprites/Characters/Wizard/Idle".to_string());
+    sprites.insert("Attack1".to_string(), "src/sprites/Characters/Wizard/Attack1".to_string());
+    let mut wizard = GenericGameObject::game_object_from_sprites(
+        [1000.0, 400.0, 0.0],
+        sprites,
+        "Idle".to_string(),
+        19999,
+        true,
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        |_system| {
+            
+        },
+        
+    );
+    wizard.base_properties_mut().transform_mut().set_local_scale([3.0, 3.0, 1.0]);
+
+    system.game_objects_mut().add_game_object("Wizard".to_string(), Box::new(wizard));
+
 }
 fn set_background(system: &mut System){
-  
-    let mut sprite = GenericGameObject::game_object_from_sprite(
+    let mut sprites = HashMap::new();
+    sprites.insert("Base".to_string(), "src/sprites/bg.png".to_string());
+    let mut bg = GenericGameObject::game_object_from_sprites(
         [0.0, 0.0, 0.0],
-        "src/sprites/bg.png".to_string(),
+        sprites,
+        "Base".to_string(),
         -9999,
+        true,
         |_system| {
             
         },
@@ -236,32 +272,14 @@ fn set_background(system: &mut System){
     );
     let window_resolution = system.get_window_resolution();
 
-    sprite
+    bg
         .base_properties_mut()
         .transform_mut()
         .set_size([window_resolution[0], window_resolution[1], 1.0]);
 
-    system.game_objects_mut().add_game_object("Background".to_string(), Box::new(sprite));
+    system.game_objects_mut().add_game_object("Background".to_string(), Box::new(bg));
 
-
-    let sprite = GenericGameObject::game_object_from_sprite(
-        [1000.0, 0.0, 0.0],
-        "src/sprites/Characters/Skeleton/Idle".to_string(),
-        1,
-        |_system| {
-            
-        },
-        |_system| {
-            
-        },
-        |_system| {
-            
-        },
-        
-    );
-
-
-    system.game_objects_mut().add_game_object("Skeleton".to_string(), Box::new(sprite));
+   
 
 
 }

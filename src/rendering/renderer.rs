@@ -12,6 +12,7 @@ use glium::backend::glutin::Display;
 use itertools::Itertools;
 
 
+
 pub struct Renderer {
     last_fps: [f32; 20],
     fps_index: usize,
@@ -28,11 +29,12 @@ impl Renderer {
         let mut game_objects = system.game_objects_mut().clone();
         let game_objects = game_objects.game_objects_mut();
         for (game_object_id, game_object) in game_objects.iter() {
-            let shape = game_object.as_ref().base_properties().mesh().vertices();
-            let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
+            let default_texture = game_object.as_ref().base_properties().animations().current_animation();
+            let shape = game_object.as_ref().base_properties().meshes()[default_texture].vertices();           
+            let vertex_buffer = glium::VertexBuffer::dynamic(display, &shape).unwrap();
             system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
 
-            let indices = game_object.base_properties().mesh().indices();
+            let indices = game_object.base_properties().meshes()[default_texture].indices();
             let index_buffer = glium::IndexBuffer::dynamic(
                 display,
                 glium::index::PrimitiveType::TrianglesList,
@@ -41,7 +43,7 @@ impl Renderer {
             .unwrap();
             system.add_index_buffer(game_object_id.clone(), index_buffer);
 
-            let image = game_object.base_properties().texture().texture();
+            let image = game_object.base_properties().animations().textures()[default_texture].texture();
             let image_dimensions = image.dimensions();
             let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
                 &image.clone().into_raw(),
@@ -130,11 +132,12 @@ impl Renderer {
         let fps_mean = (1.0 / (fps_mean / 1_000_000_000.0)).round();
 
         let fps_raw = (1.0 / (time_since_render.as_nanos() as f32 / 1_000_000_000.0)).round();
+        let delta_time = 1.0 / fps_raw;
         for (_game_object_id, game_object) in system.game_objects_mut().game_objects_mut().iter_mut() {
             game_object
                 .base_properties_mut()
                 .transform_mut()
-                .delta_time = 1.0 / fps_raw;
+                .delta_time = delta_time;
         }
         let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render);
         let mut target = display.draw();
@@ -164,8 +167,11 @@ impl Renderer {
         let view = *system.camera().transform().get_view_matrix().as_ref();
         let mut game_objects = system.game_objects_mut().clone();
         let game_objects = game_objects.game_objects_mut();
+        for (_, game_object) in system.game_objects_mut().game_objects_mut().iter_mut(){
+            game_object.base_properties_mut().animations_mut().run(delta_time);
 
-        for (game_object_id, game_object) in game_objects.iter().sorted_by(|a,b|
+        }
+        for (game_object_id, game_object) in game_objects.iter_mut().sorted_by(|a,b|
             {
             let first_z_index = &a.1.base_properties()
             .transform().z_index();
@@ -175,8 +181,9 @@ impl Renderer {
             Ord::cmp(first_z_index,second_z_index)
         }
        
-    ) {
-            if game_object.base_properties().mesh().should_render(){
+    ) {  
+
+            if game_object.base_properties().should_render(){
                 let model = *game_object
                 .base_properties()
                 .transform()
@@ -184,6 +191,8 @@ impl Renderer {
                 .as_ref();
 
             let vertex_buffer = &system.vertex_buffers()[game_object_id];
+            let shape = game_object.as_ref().base_properties().animations().get_current_frame();
+            vertex_buffer.write(&shape);
             let index_buffer = &system.index_buffers()[game_object_id];
             let diffuse_texture = &system.textures()[game_object_id];
         
@@ -196,6 +205,7 @@ impl Renderer {
                     &params,
                 )
                 .unwrap();
+
             }
            
         }

@@ -6,11 +6,20 @@ use sheep::SerializedSpriteSheet;
 pub struct Texture{
     meta_data: SerializedSpriteSheet,
     texture:RgbaImage,
+    individual_sprite_size: (f32,f32),
 }
 impl Texture{
-    pub fn new(texture: RgbaImage, meta_data: SerializedSpriteSheet)->Self{
+    pub fn new(
+        texture: RgbaImage,
+        individual_sprite_size: (f32,f32),
+        meta_data: SerializedSpriteSheet
+    )->Self{
 
-        Texture{texture,meta_data}
+        Texture{
+            texture,
+            meta_data,
+            individual_sprite_size
+        }
     }
     pub fn meta_data(&self)->&SerializedSpriteSheet{
         &self.meta_data
@@ -26,5 +35,11 @@ impl Texture{
 
     pub fn texture_mut(&mut self)->&mut RgbaImage{
         &mut self.texture
+    }
+    pub fn individual_sprite_size(&self) ->&(f32,f32){
+        &self.individual_sprite_size
+    }
+    pub fn individual_sprite_size_mut(&mut self) ->&mut (f32,f32){
+        &mut self.individual_sprite_size
     }
 }

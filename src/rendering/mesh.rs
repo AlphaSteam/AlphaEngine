@@ -1,6 +1,7 @@
+
 use sheep::SerializedSpriteSheet;
 
-use crate::rendering::vertex::Vertex;
+use crate::{rendering::vertex::Vertex, helpers::math::normalize_number};
 
 /**
     Struct that represents an object mesh.
@@ -10,7 +11,6 @@ use crate::rendering::vertex::Vertex;
 pub struct Mesh {
     vertices: Vec<Vertex>,
     indices: Vec<u32>,
-    should_render: bool,
 }
 
 impl Mesh {
@@ -18,7 +18,7 @@ impl Mesh {
     Initializer of a Mesh.
     */
     pub fn new(vertices: Vec<Vertex>, indices: Vec<u32>) -> Self {
-        let mesh = Mesh { vertices, indices, should_render: true };
+        let mesh = Mesh { vertices, indices };
         mesh
     }
 
@@ -73,19 +73,53 @@ impl Mesh {
             },
         ];
         let indices = vec![0, 1, 2, 3, 0, 2];
-        let mesh = Mesh { vertices, indices, should_render: true };
+        let mesh = Mesh { vertices, indices };
         mesh
     }
-     /**
-    Get the render flag. It determines if the mesh should be rendered or not.
-    */
-    pub fn should_render(&self)->bool{
-        self.should_render
+   
+    pub fn get_vertex_buffer_animated(sprite_sheet: &SerializedSpriteSheet, sprite_index: usize) -> Vec<Vertex>{
+        let max_width = sprite_sheet.texture_width;
+        let max_height = sprite_sheet.texture_height;
+        let sprites = sprite_sheet.sprites.clone();
+        let sprite = &sprites[sprite_index];
+        let min_x = normalize_number(sprite.x,0.0,max_width);
+        let max_x  = normalize_number(sprite.x + sprite.width ,0.0,max_width);
+
+        let min_y = normalize_number(sprite.y,0.0,max_height);
+        let max_y = normalize_number(sprite.y + sprite.height,0.0,max_height);
+
+
+
+        let left_up = [min_x, min_y];
+        let right_up = [max_x, min_y];
+        let left_down = [min_x,max_y];
+        let right_down = [max_x, max_y];
+
+        
+        vec![
+            Vertex {
+                position: [0.0, 1.0, 0.0],
+                tex_coords: left_down,
+            },
+            Vertex {
+                position: [0.0, 0.0, 0.0],
+                tex_coords: left_up,
+            },
+            Vertex {
+                position: [1.0, 0.0, 0.0],
+                tex_coords: right_up,
+            },
+            Vertex {
+                position: [1.0, 1.0, 0.0],
+                tex_coords: right_down,
+            },
+        ]
+
     }
-     /**
-    Set the render flag. It determines if the mesh should be rendered or not.
-    */
-    pub fn set_should_render(&mut self, val: bool){
-        self.should_render = val;
+    pub fn create_rectangle_animated(sprite_sheet: &SerializedSpriteSheet, sprite_index: usize) -> Self{
+        let vertices = Mesh::get_vertex_buffer_animated(sprite_sheet, sprite_index);
+        let indices = vec![0, 1, 2, 3, 0, 2];
+        let mesh = Mesh { vertices, indices};
+        mesh
     }
 }
