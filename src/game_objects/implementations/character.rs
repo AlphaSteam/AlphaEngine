@@ -7,7 +7,10 @@ pub struct Character {
     base_properties: BaseGameObjectProperties,
     max_hp: i32,
     current_hp:i32,
+    max_energy: i32,
+    current_energy: i32,
     deck_identifier: String,
+    player: bool,
     start: fn(&mut System),
     update: fn(&mut System),
     stop: fn(&mut System),
@@ -19,7 +22,10 @@ impl Character {
         base_properties: BaseGameObjectProperties,
         max_hp: i32,
         current_hp:i32, 
+        max_energy: i32,
+        current_energy: i32,
         deck_identifier: String,
+        player: bool,
         start: fn(&mut System),
         update: fn(&mut System),
         stop: fn(&mut System),
@@ -31,19 +37,26 @@ impl Character {
             base_properties,
             max_hp,
             current_hp,
+            current_energy,
+            max_energy,
             deck_identifier,
+            player,
             start,
             update,
             stop,
             action
         }
     }
-    pub fn character_from_sprites(position: [f32; 3],
+    pub fn character_from_sprites(
+        position: [f32; 3],
         texture_paths: HashMap<String, String>,
         default_texture:String,
         max_hp: i32,
         current_hp:i32,
+        max_energy: i32,
+        current_energy: i32,
         deck_identifier: String,
+        player: bool,
         z_index:i32,
         should_render: bool,
         start: fn(&mut System),
@@ -64,7 +77,10 @@ impl Character {
             base_properties,
             max_hp,
             current_hp,
+            max_energy,
+            current_energy,
             deck_identifier,
+            player,
             start,
             update,
             stop,
@@ -76,7 +92,15 @@ impl Character {
     }
     pub fn set_max_hp(mut self, max_hp: i32){
         self.max_hp = max_hp;
+    } 
+    pub fn player(&self) -> bool {
+        self.player
     }
+
+    pub fn set_player(mut self, player: bool){
+        self.player = player;
+    }
+
 
     pub fn current_hp(&self) -> i32 {
         self.current_hp
@@ -85,7 +109,20 @@ impl Character {
         self.current_hp = hp;
     }
 
-    pub fn dedeck_identifierck(&self)->&String{
+    pub fn max_energy(&self) -> i32 {
+        self.max_energy
+    }
+    pub fn set_max_energy(mut self, max_hp: i32){
+        self.max_energy = max_hp;
+    }
+
+    pub fn current_energy(&self) -> i32 {
+        self.current_energy
+    }
+    pub fn set_current_energy(mut self, energy: i32){
+        self.current_energy = energy;
+    }
+    pub fn deck_identifier(&self)->&String{
         &self.deck_identifier
     }
     pub fn deck_identifier_mut(&mut self)->&mut String{

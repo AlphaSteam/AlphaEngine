@@ -6,10 +6,11 @@ use super::fullscreen::Fullscreen;
 use super::game_objects::GameObjects;
 pub use crate::game::Game;
 use crate::game_objects::game_object::{GameObject, BaseGameObjectProperties};
-use crate::game_objects::implementations::generic_game_object::GenericGameObject;
+use crate::game_objects::implementations::{generic_game_object::GenericGameObject, character::Character};
 use crate::roguelike::card_pool::CardPool;
 use crate::roguelike::deck::Deck;
 use crate::text::{render_text::Text};
+
 pub use crate::window::Window;
 use crate::{audio::audio_engine::AudioEngine, net::Net};
 use crate::{rendering::vertex::Vertex, shaders::Shader};
@@ -38,12 +39,13 @@ pub struct System {
     camera: Camera,
     display: Display,
     current_shader: Shader,
-    text: Vec<Text>,
+    text: HashMap<String, Text>,
     frame_time_target_nanos: u64,
     audio_engine: AudioEngine,
     net: Option<Net>,
     card_pools: HashMap<String, CardPool>,
     decks: HashMap<String, Deck>,
+    player: String,
 }
 
 impl System {
@@ -66,12 +68,13 @@ impl System {
             camera: Camera::new([0.0, 0.0, 10.0], [0.0, 0.0, 1.0], projection),
             display: display.clone(),
             current_shader: Shader::Basic,
-            text: Vec::new(),
+            text: HashMap::new(),
             frame_time_target_nanos: (1_000_000_000 / 60),
             audio_engine: AudioEngine::new(),
             net: None,
             card_pools,
-            decks: HashMap::new()
+            decks: HashMap::new(),
+            player:"".to_string(),
         }
     }
     
@@ -161,30 +164,21 @@ impl System {
         &self.current_shader
     }
 
-    /* pub fn add_font(&mut self, font_name: &str, font_path: &str) {
-        let font = Font::new(font_path, &self.display);
-        self.fonts.insert(font_name.to_string(), font);
-    } */
-    /* pub fn fonts(&self) -> &HashMap<String, Font> {
-        &self.fonts
-    } */
-  /*   pub fn fonts_mut(&mut self) -> &mut HashMap<String, Font> {
-        &mut self.fonts
-    } */
-    pub fn text(&self) -> &Vec<Text> {
+    pub fn text(&self) -> &HashMap<String, Text> {
         &self.text
     }
-    pub fn text_mut(&mut self) -> &mut Vec<Text> {
+    pub fn text_mut(&mut self) -> &mut HashMap< String, Text> {
         &mut self.text
     }
     pub fn render_text(
         &mut self,
+        id: String,
         text: String,
         position: [f32; 2],
         color: [u8; 3],
     ) {
         let text = Text::new(text, position, color);
-        self.text.push(text);
+        self.text.insert(id, text);
     }
     pub fn set_framerate_target(&mut self, framerate: f32) {
         let seconds = 1.0 / framerate;
@@ -359,8 +353,14 @@ impl System {
 
     
     scope.push("game_objects", game_objects.clone());
-    
-    let _err = engine.run_with_scope(&mut scope, &script).unwrap();
+    match engine.run_file_with_scope(&mut scope, script.clone().into()){
+        Ok(_) =>(),
+        Err(_) =>{
+            let _err = engine.run_with_scope(&mut scope, &script).unwrap();
+
+        }
+    }
+
 
     let new_game_objects: HashMap<String, Box<dyn GameObject>>  = scope.get_value("game_objects").unwrap();
     *self.game_objects.game_objects_mut() = new_game_objects;
@@ -383,6 +383,50 @@ impl System {
         &mut self.decks
     }
 
+    pub fn player(self)-> String{
+        self.player
+    }
+    pub fn set_player(mut self, player: String){
+       self.player = player; 
+    }
+    pub fn add_game_object(mut self, game_object_id: String, game_object: Box<dyn GameObject>) {
+        
+            match game_object.as_any().downcast_ref::<Character>(){
+                Some(character)=>{
+                    if character.player() {
+                        self.set_player(game_object_id);
+                    }
+                }
+                None=>{
+                    let game_objects = self.game_objects_mut().game_objects_mut();
+                    game_objects.entry(game_object_id).or_insert(game_object);
+                }
+            }
+            
+        }
+      
+  
+    pub fn remove_game_object(&mut self, game_object_id: String) {
+        let game_objects = self.game_objects_mut().game_objects_mut();
+        game_objects.remove_entry(&game_object_id).unwrap();
+            
+    }
+
+   /*  pub fn get_player(&mut self) -> &Character {
+        let mut character: Character;
+         match &self.game_objects().game_objects().get(&self.player.to_string()){
+            Some(player)=> {
+               character = *player.as_any().downcast_ref::<Character>().unwrap();
+            }
+            None=> (),
+
+         }
+        &character
+         
+         
+         
+         
+    } */
   
 }
 #[export_module]

@@ -153,7 +153,7 @@ impl Renderer {
         egui: &mut EguiGlium,
         fps: f32,
         frame_time: Duration,
-        texts: Vec<Text>,
+        texts: HashMap<String, Text>,
         ui_textures: HashMap<String, TextureId>,
         card_textures: HashMap<String, TextureId>
 
@@ -203,7 +203,7 @@ impl Renderer {
         }
         let mut transparent_frame = Frame::default();
         transparent_frame.fill = Color32::TRANSPARENT;
-        for (i, txt) in texts.iter().enumerate() {
+        for (i, txt) in texts.iter() {
             let pos_x = txt.position[0];
             let pos_y = txt.position[1];
             let r = txt.color[0];
@@ -218,6 +218,7 @@ impl Renderer {
                 ui.add(egui::Label::new(format!("{}", txt.text)).text_style(TextStyle::Heading).text_color(Color32::from_rgb(r,g,b)));
             });
         }
+        
         let (needs_repaint, shapes) = egui.end_frame(&display);
         return (needs_repaint, shapes);
     }

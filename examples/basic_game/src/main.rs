@@ -53,10 +53,8 @@ fn start(system: &mut System, event_manager: &mut EventManager) {
     add_game_object(game_objects,"script object",generic_object); */
 
   "#.to_string());
-  //system.render_text("Test".to_string(),[300.0,300.0], [100,200,100]);
-  //system.render_text("Test2".to_string(),[1000.0,300.0], [200,255,0]);
 
-  //system.render_text("aaaaaaaaaaa".to_string(),[100.0,300.0],  [200,255,0]);
+
 
 }
 fn update(system: &mut System, _event_manager: &mut EventManager) {
@@ -106,7 +104,10 @@ fn process_inputs(system: &mut System, key: KeyboardInput, _device_id: DeviceId)
                         "Idle".to_string(),
                         100,
                         100,
+                        3,
+                        3,
                         "".to_string(),
+                        false,
                         0,
                         true,
                         |_system| {
@@ -378,6 +379,10 @@ fn setup_game_objects(system: &mut System) {
 
     set_background(system);
     set_characters(system);
+
+
+    
+
 }
 fn set_characters(system: &mut System){
     let mut sprites = HashMap::new();
@@ -389,7 +394,10 @@ fn set_characters(system: &mut System){
         "Idle".to_string(),
         100,
         100,
+        3,
+        3,
         "".to_string(),
+        false,
         0,
         true,
         |_system| {
@@ -408,9 +416,9 @@ fn set_characters(system: &mut System){
     );
 
     skeleton.base_properties_mut().transform_mut().set_local_scale([4.0, 4.0, 1.0]);
+    system.render_text("Skeleton HP".to_string(), format!("HP: {}",skeleton.current_hp()).to_string(),[1500.0, 700.0], [100,200,100]);
 
     system.game_objects_mut().add_game_object("Skeleton".to_string(), Box::new(skeleton));
-
 
     let cards = system.card_pools().clone()["Red"].cards().clone();
 
@@ -425,7 +433,10 @@ fn set_characters(system: &mut System){
         "Idle".to_string(),
         100,
         100,
+        4,
+        4,
         "Wizard deck".to_string(),
+        true,
         0,
         true,
         |_system| {
@@ -443,6 +454,8 @@ fn set_characters(system: &mut System){
         
     );
     wizard.base_properties_mut().transform_mut().set_local_scale([3.0, 3.0, 1.0]);
+    system.render_text("Wizard HP".to_string(), format!("HP: {}",wizard.current_hp()).to_string(),[450.0, 700.0], [100,200,100]);
+    system.render_text("Energy".to_string(), format!("Energy: {}", wizard.current_energy()).to_string(),[100.0, 1000.0], [100,200,100]);
 
     system.game_objects_mut().add_game_object("Wizard".to_string(), Box::new(wizard));
 
