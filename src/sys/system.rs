@@ -5,8 +5,10 @@ use super::cam::projection_ortho::ProjectionOrtho;
 use super::fullscreen::Fullscreen;
 use super::game_objects::GameObjects;
 pub use crate::game::Game;
-use crate::game_objects::game_object::GameObject;
+use crate::game_objects::game_object::{GameObject, BaseGameObjectProperties};
 use crate::game_objects::implementations::generic_game_object::GenericGameObject;
+use crate::roguelike::card_pool::CardPool;
+use crate::roguelike::deck::Deck;
 use crate::text::{render_text::Text};
 pub use crate::window::Window;
 use crate::{audio::audio_engine::AudioEngine, net::Net};
@@ -23,7 +25,6 @@ use rg3d_sound::{
 use rhai::plugin::*;
 use rhai::{Engine, Scope};
 use glium::backend::glutin::Display;
-
 /**
 Struct that hosts the engine functions
 
@@ -41,6 +42,8 @@ pub struct System {
     frame_time_target_nanos: u64,
     audio_engine: AudioEngine,
     net: Option<Net>,
+    card_pools: HashMap<String, CardPool>,
+    decks: HashMap<String, Deck>,
 }
 
 impl System {
@@ -54,6 +57,7 @@ impl System {
             -10.0,
             10.0,
         );
+        let card_pools: HashMap<String,CardPool> = HashMap::new();
         Self {
             game_objects: GameObjects::new(HashMap::new()),
             vertex_buffers: HashMap::new(),
@@ -66,6 +70,8 @@ impl System {
             frame_time_target_nanos: (1_000_000_000 / 60),
             audio_engine: AudioEngine::new(),
             net: None,
+            card_pools,
+            decks: HashMap::new()
         }
     }
     
@@ -175,10 +181,9 @@ impl System {
         &mut self,
         text: String,
         position: [f32; 2],
-        scale: f32,
         color: [u8; 3],
     ) {
-        let text = Text::new(text, position, scale, color);
+        let text = Text::new(text, position, color);
         self.text.push(text);
     }
     pub fn set_framerate_target(&mut self, framerate: f32) {
@@ -332,9 +337,15 @@ impl System {
         let mut engine = Engine::new_raw();
         type GameObjectsHash =HashMap<String, Box<dyn GameObject>>;
         engine
-        .register_type_with_name::<Box<dyn GameObject>>("GameObject")
-        .register_fn("game_object_from_sprites", GenericGameObject::game_object_from_sprites_script);
+        .register_type_with_name::<BaseGameObjectProperties>("BaseGameObjectProperties");
 
+        engine
+        .register_type_with_name::<Box<dyn GameObject>>("GameObject")
+        .register_fn("game_object_from_sprites", GenericGameObject::game_object_from_sprites_script)
+        .register_get("base_properties", GenericGameObject::base_properties_script);
+
+
+        
         engine
         .register_type_with_name::<GameObjectsHash>("GameObjects");
         
@@ -356,6 +367,23 @@ impl System {
 
     }
     
+    pub fn card_pools(&self)->& HashMap<String,CardPool> {
+        &self.card_pools
+    }
+
+    pub fn card_pools_mut(&mut self)->&mut HashMap<String,CardPool>{
+        &mut self.card_pools
+    }
+
+    pub fn decks(&self)->& HashMap<String, Deck> {
+        &self.decks
+    }
+
+    pub fn decks_mut(&mut self)->&mut HashMap<String, Deck>{
+        &mut self.decks
+    }
+
+  
 }
 #[export_module]
 pub mod engine_scripts {

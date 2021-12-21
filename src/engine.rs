@@ -4,11 +4,13 @@ use crate::event::event_manager::EventManager;
 pub use crate::game::Game;
 pub use crate::sys::private_system::PrivateSystem;
 use crate::window::Window;
+use egui_glium::EguiGlium;
 use glutin::event_loop::EventLoop;
 pub struct Engine {
     event_loop: EventLoop<()>,
     private_system: PrivateSystem,
     event_manager: EventManager,
+    egui: EguiGlium,
 }
 impl Engine {
     pub fn new(game: Game, win_title: String) -> Self {
@@ -16,12 +18,14 @@ impl Engine {
         let display = window.display;
         let event_loop = window.event_loop;
         let mut event_manager = EventManager::new();
-        let mut private_system = PrivateSystem::new(game, display);
-        private_system.start(&mut event_manager);
+        let mut private_system = PrivateSystem::new(game, display.clone());
+        let mut egui = egui_glium::EguiGlium::new(&display);
+        private_system.start(&mut egui,&mut event_manager);
         let engine = Engine {
             event_loop,
             private_system,
             event_manager,
+            egui,
         };
 
         engine
@@ -31,12 +35,12 @@ impl Engine {
         let mut private_system = self.private_system;
         let mut event_manager = self.event_manager.clone();
         let display = private_system.display().clone();
-        let mut egui = egui_glium::EguiGlium::new(&display);
+        
     
         let mut old_render = Instant::now();
         let mut old_frame = Instant::now();
         let mut remaining_time = private_system.system().frame_time_target_nanos();
-
+        let mut egui = self.egui;
         self.event_loop.run(move |ev, _, control_flow| {
             let now = Instant::now();
 

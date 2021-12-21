@@ -9,7 +9,6 @@ impl Text {
     pub fn new(
         text: String,
         position: [f32; 2],
-        scale: f32,
         color: [u8; 3],
     ) -> Self {
         Text {

@@ -9,6 +9,7 @@ pub struct GenericGameObject {
     start: fn(&mut System),
     update: fn(&mut System),
     stop: fn(&mut System),
+    action:  fn(&mut System),
 }
 impl GenericGameObject {
     pub fn new(
@@ -18,12 +19,22 @@ impl GenericGameObject {
         animations: Animations,
         z_index: i32,
         should_render: bool,
+        ui:bool,
         start: fn(&mut System),
         update: fn(&mut System),
-        stop: fn(&mut System)
+        stop: fn(&mut System),
+        action: fn(&mut System),
     ) -> Self {
-        let base_properties = BaseGameObjectProperties::new(position, size, meshes, animations, z_index,should_render);
-        GenericGameObject { base_properties, start, update, stop }
+        let base_properties = BaseGameObjectProperties::new(
+                                                                                position,
+                                                                                size,
+                                                                                meshes,
+                                                                                animations,
+                                                                                z_index,
+                                                                                should_render,
+                                                                                ui
+                                                                            );
+        GenericGameObject { base_properties, start, update, stop, action }
     }
 
     pub fn game_object_from_sprites(
@@ -32,13 +43,15 @@ impl GenericGameObject {
         default_texture: String,
         z_index: i32,
         should_render: bool,
+        ui:bool,
         start: fn(&mut System),
         update: fn(&mut System),
-        stop: fn(&mut System)
+        stop: fn(&mut System),
+        action: fn(&mut System)
     ) -> Self {
 
-        let base_properties = BaseGameObjectProperties::game_object_from_sprites(position, texture_paths, default_texture, z_index,should_render);
-        GenericGameObject { base_properties, start, update, stop }
+        let base_properties = BaseGameObjectProperties::game_object_from_sprites(position, texture_paths, default_texture, z_index,should_render,ui);
+        GenericGameObject { base_properties, start, update, stop, action }
     }
     pub fn game_object_from_sprites_script(
         position: Array,
@@ -46,6 +59,7 @@ impl GenericGameObject {
         default_texture: rhai::ImmutableString,
         z_index: i32,
         should_render:bool,
+        ui:bool,
     ) -> Self {
         let position = [position[0].clone_cast::<f64>() as f32,position[1].clone_cast::<f64>() as f32,position[2].clone_cast::<f64>() as f32];
         let mut texture_paths_hash = HashMap::new();
@@ -54,13 +68,17 @@ impl GenericGameObject {
             let texture_name: String = texture_name.to_string();
             texture_paths_hash.insert(texture_name,texture_path);
         }
-        let base_properties = BaseGameObjectProperties::game_object_from_sprites(position, texture_paths_hash, default_texture.to_string(), z_index,should_render);
+        let base_properties = BaseGameObjectProperties::game_object_from_sprites(position, texture_paths_hash, default_texture.to_string(), z_index,should_render,ui);
         GenericGameObject { 
             base_properties,
             start:| _system|{},
             update:| _system|{},
-            stop:| _system|{} 
+            stop:| _system|{},
+            action:| _system|{},
         }
+    }
+    pub fn base_properties_script(&mut self) -> BaseGameObjectProperties {
+        self.base_properties.clone()
     }
 }
 impl GmObj for GenericGameObject {
@@ -78,5 +96,8 @@ impl GmObj for GenericGameObject {
     }
     fn stop(&mut self) -> fn(&mut System) {
         self.stop
+    }
+    fn action(&mut self) -> fn(&mut System){
+        self.action
     }
 }

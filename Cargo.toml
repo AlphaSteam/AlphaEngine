@@ -28,3 +28,6 @@ owning_ref = "0.4.1"
 sheep = "0.3.0"
 ron = "0.7.0"
 itertools = "0.10.2"
+epi='*'
+indexmap = "1.7.0"
+rand = "0.8.4"

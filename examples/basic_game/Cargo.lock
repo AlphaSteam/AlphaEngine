@@ -60,14 +60,17 @@ dependencies = [
  "dyn-clonable",
  "egui",
  "egui_glium",
+ "epi",
  "fontdue",
  "glium",
  "glutin",
  "image",
+ "indexmap",
  "itertools",
  "laminar",
  "nalgebra-glm",
  "owning_ref",
+ "rand",
  "relative-path",
  "rg3d-sound",
  "rhai",
@@ -1102,6 +1105,16 @@ dependencies = [
  "png",
  "scoped_threadpool",
  "tiff",
+]
+
+[[package]]
+name = "indexmap"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc633605454125dec4b66843673f01c7df2b89479b32e0ed634e43a91cff62a5"
+dependencies = [
+ "autocfg",
+ "hashbrown",
 ]
 
 [[package]]

@@ -22,7 +22,6 @@ GameObjects{game_objects}
     pub fn game_objects_mut(&mut self) -> &mut HashMap<String, Box<dyn GameObject>> {
         &mut self.game_objects
     }
-
     pub fn get_game_object_mut(
         &mut self,
         game_object_id: String,

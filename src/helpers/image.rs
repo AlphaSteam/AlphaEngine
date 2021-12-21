@@ -3,6 +3,7 @@ use std::io::Cursor;
 use image::{RgbaImage, ImageFormat};
 use image::io::Reader as ImageReader;
 
+
 pub fn load_texture(texture_path:  String)-> RgbaImage{
     let texture = ImageReader::open(texture_path.clone());
      match texture {

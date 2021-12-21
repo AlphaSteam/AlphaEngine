@@ -26,6 +26,7 @@ pub struct BaseGameObjectProperties {
     meshes: HashMap<String, Mesh>,
     animations: Animations,
     should_render: bool,
+    ui: bool,
 }
 
 impl BaseGameObjectProperties {
@@ -35,6 +36,7 @@ impl BaseGameObjectProperties {
         animations: Animations,
         z_index: i32,
         should_render: bool,
+        ui:bool,
     ) -> Self {
         let position_vec3 = glm::vec3(position[0], position[1], position[2]);
         let scale_vec3 = glm::vec3(size[0], size[1], size[2]);
@@ -46,6 +48,7 @@ impl BaseGameObjectProperties {
             meshes,
             animations,
             should_render,
+            ui
         };
 
         game_object
@@ -57,6 +60,7 @@ impl BaseGameObjectProperties {
         default_texture: String, 
         z_index: i32,
         should_render: bool,
+        ui:bool,
     ) -> Self {
         
         let mut meshes : HashMap<String, Mesh> = HashMap::new();
@@ -152,7 +156,7 @@ impl BaseGameObjectProperties {
 
         let mut animations = Animations::new(textures);
         *animations.current_animation_mut() = default_texture;
-        BaseGameObjectProperties::new(position, [texture_w, texture_h, 1.0], meshes, animations, z_index,should_render)
+        BaseGameObjectProperties::new(position, [texture_w, texture_h, 1.0], meshes, animations, z_index,should_render, ui)
     }
    
     pub fn meshes(&self) -> &HashMap<String, Mesh> {
@@ -189,6 +193,19 @@ impl BaseGameObjectProperties {
     pub fn set_should_render(&mut self, val: bool){
         self.should_render = val;
     }
+
+    /**
+    Get ui flag. It determines if the texture will appear on a ui element or not.
+    */
+    pub fn ui(&self)->bool{
+        self.ui
+    }
+      /**
+    Set ui flag. It determines if the texture will appear on a ui element or not.
+    */
+    pub fn set_ui(&mut self, val: bool){
+        self.ui = val;
+    }
 }
 
 
@@ -200,6 +217,7 @@ pub trait GmObj: Clone {
     fn start(&mut self) -> fn(&mut System);
     fn update(&mut self) -> fn(&mut System);
     fn stop(&mut self) -> fn(&mut System);
+    fn action(&mut self) -> fn(&mut System);
 }
 
 #[clonable]

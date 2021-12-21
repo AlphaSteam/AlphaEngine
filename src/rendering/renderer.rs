@@ -1,12 +1,14 @@
 extern crate glium;
-
+use epi::NativeTexture;
+use std::collections::HashMap;
 use std::time::{Duration, Instant};
-
+use crate::game_objects::game_object::{GmObj, GameObject};
+use crate::game_objects::implementations::card::Card;
 pub use crate::rendering::vertex::Vertex;
 use crate::sys::{system::System};
 use crate::text::render_text::Text;
 pub use crate::window::Window;
-use egui::{Frame, Color32, FontDefinitions, TextStyle, FontFamily, Style};
+use egui::{Frame, Color32, TextStyle, TextureId, Sense};
 use egui::epaint::ClippedShape;
 use egui_glium::EguiGlium;
 use glium::{uniform, BackfaceCullingMode, Blend, Surface};
@@ -14,10 +16,11 @@ use glium::backend::glutin::Display;
 use itertools::Itertools;
 
 
-
 pub struct Renderer {
     last_fps: [f32; 20],
     fps_index: usize,
+    ui_textures: HashMap<String,TextureId>,
+    card_textures: HashMap<String,TextureId>
 }
 
 impl Renderer {
@@ -25,45 +28,135 @@ impl Renderer {
         Renderer {
             last_fps: [0.0; 20],
             fps_index: 0,
+            ui_textures: HashMap::new(),
+            card_textures: HashMap::new(),
         }
     }
-    pub fn start(&self, display: &Display, system: &mut System) {
-        let mut game_objects = system.game_objects_mut().clone();
-        let game_objects = game_objects.game_objects_mut();
-        for (game_object_id, game_object) in game_objects.iter() {
-            let default_texture = game_object.as_ref().base_properties().animations().current_animation();
-            let shape = game_object.as_ref().base_properties().meshes()[default_texture].vertices();           
-            let vertex_buffer = glium::VertexBuffer::dynamic(display, &shape).unwrap();
-            system.add_vertex_buffer(game_object_id.clone(), vertex_buffer);
+    pub fn get_card_ui_textures(&mut self, display : &Display, egui: &mut EguiGlium, card: &Card, identifier: String){
+        let default_texture = card.base_properties().animations().current_animation();
 
-            let indices = game_object.base_properties().meshes()[default_texture].indices();
-            let index_buffer = glium::IndexBuffer::dynamic(
-                display,
-                glium::index::PrimitiveType::TrianglesList,
-                &indices,
-            )
-            .unwrap();
-            system.add_index_buffer(game_object_id.clone(), index_buffer);
+        let image = card.base_properties().animations().textures()[default_texture].texture();
 
-            let image = game_object.base_properties().animations().textures()[default_texture].texture();
-            let image_dimensions = image.dimensions();
-            let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
-                &image.clone().into_raw(),
-                image_dimensions,
-            );
+        let has_ui_texture = self.ui_textures.get(&identifier);
+        match has_ui_texture{
+            Some(_)=>(),
+            None=>{
+                let image_dimensions = image.dimensions();
+                let image_raw = glium::texture::RawImage2d::from_raw_rgba( image.clone().into_raw(),
+                image_dimensions);
+                let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
 
-            let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
-            system.add_texture(game_object_id.clone(), texture);
+                let glium_texture = std::rc::Rc::new(texture);
+                // Allocate egui's texture id for GL texture
+                let texture_id = egui.painter_mut().register_native_texture(glium_texture);
+                self.card_textures.insert(identifier,texture_id);
+            }
+        };
+    }
+    pub fn get_buffers(&mut self, system: &mut System, display : &Display, egui: &mut EguiGlium, object_id: &String, object: &mut Box<dyn GameObject>){
+      
+            let current_animation = object.as_ref().base_properties().animations().current_animation().clone();
+
+
+            let has_vertex_buffer = system.vertex_buffers().get(object_id);
+            match has_vertex_buffer{
+                Some(_)=>(),
+                None=>{
+                    let shape = object.as_ref().base_properties().meshes()[&current_animation.clone()].vertices();           
+                    let vertex_buffer = glium::VertexBuffer::dynamic(display, &shape).unwrap();
+                    system.add_vertex_buffer(object_id.clone(), vertex_buffer);
+                }
+            };
+            let has_index_buffer = system.index_buffers().get(object_id);
+            match has_index_buffer{
+                Some(_)=>(),
+                None=>{
+                    let indices = object.base_properties().meshes()[&current_animation.clone()].indices();
+                    let index_buffer = glium::IndexBuffer::dynamic(
+                        display,
+                        glium::index::PrimitiveType::TrianglesList,
+                        &indices,
+                    )
+                    .unwrap();
+                    system.add_index_buffer(object_id.clone(), index_buffer);
+                }
+            };
+           
+           
+                let image = object.base_properties().animations().textures()[&current_animation.clone()].texture();
+           
+
+                
+                if object.base_properties().ui() {
+                    let has_ui_texture = self.ui_textures.get(object_id);
+                    match has_ui_texture{
+                        Some(_)=>(),
+                        None=>{
+                            let image_dimensions = image.dimensions();
+                            let image_raw = glium::texture::RawImage2d::from_raw_rgba( image.clone().into_raw(),
+                            image_dimensions);
+                            let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
+            
+                            let glium_texture = std::rc::Rc::new(texture);
+                            // Allocate egui's texture id for GL texture
+                            let texture_id = egui.painter_mut().register_native_texture(glium_texture);
+                            self.ui_textures.insert(object_id.to_string(),texture_id);
+                        }
+                    };
+           
+                    
+
+                    
+                }
+                else{
+                    let has_texture = system.textures().get(object_id);
+                    match has_texture{
+                        Some(_)=>(),
+                        None=>{
+                            let image_dimensions = image.dimensions();
+                            let image_raw = glium::texture::RawImage2d::from_raw_rgba_reversed(
+                                &image.clone().into_raw(),
+                                image_dimensions,
+                            );
+                            let texture = glium::texture::SrgbTexture2d::new(display, image_raw).unwrap();
+                            system.add_texture(object_id.clone(), texture);
+                        }
+                    };
+
+
+                }
+
+          
+    }
+    pub fn start(&mut self, display: &Display,egui: &mut EguiGlium, system: &mut System) {
+        let mut game_objects = system.game_objects_mut().game_objects_mut().clone();
+        for (object_id, object) in game_objects.iter_mut() {
+
+            self.get_buffers(system, display,egui,object_id, object);
+
         }
-  
+
+        for (deck_name, deck) in system.decks().iter(){
+
+            for (index,card) in deck.deck.iter().enumerate(){
+                let identifier = format!("{}-{}", deck_name, index.to_string());
+               self.get_card_ui_textures(display,egui,card, identifier)
+
+            }
+            
+        }
       
     }
     pub fn render_gui(
+        system: &mut System,
         display: &Display,
         egui: &mut EguiGlium,
         fps: f32,
         frame_time: Duration,
-        texts: Vec<Text>
+        texts: Vec<Text>,
+        ui_textures: HashMap<String, TextureId>,
+        card_textures: HashMap<String, TextureId>
+
     ) -> (bool, Vec<ClippedShape>) {
         egui.begin_frame(display);
         
@@ -71,7 +164,43 @@ impl Renderer {
             ui.label(format!("Fps: {}", fps));
             ui.label(format!("Frame time: {:?}", frame_time))
         });
+        
 
+        for (game_object_id,texture_id) in ui_textures.iter() {
+            let game_object =  system.game_objects_mut().get_game_object_mut(game_object_id.clone());
+            if game_object.base_properties().should_render(){
+                egui::Area::new(game_object_id ).show(egui.ctx(), |ui| {
+                    let local_scale = game_object.base_properties().transform().local_scale();
+                    let size = [local_scale[0], local_scale[1]];
+                    ui.add(egui::Image::new(*texture_id, size).sense(Sense::click_and_drag()));
+                    
+                });
+            }
+         
+
+        }
+        // Render cards in hand
+        for (card_id,texture_id) in card_textures.iter() {
+            let identifiers: Vec<&str> = card_id.split("-").collect();
+            let deck_id = identifiers[0];
+            let card_id: usize = identifiers[1].parse::<usize>().unwrap() as usize;
+            let card =  system.decks().get(deck_id).unwrap().deck.get(card_id as usize).unwrap();
+            if card.base_properties().should_render(){
+                egui::Area::new(format!("{} {}", card_id, "text") ).show(egui.ctx(), |ui| {
+                    let local_scale = card.base_properties().transform().local_scale();
+                    let size = [local_scale[0], local_scale[1]];
+                  
+                   ui.add(egui::Label::new(format!("{}",card.clone().cost())) );
+                   ui.add(egui::Label::new(format!("{}",card.clone().name())));
+                   ui.add(egui::Image::new(*texture_id, size));
+                   ui.add(egui::Label::new(format!("{}",card.clone().description())));
+                
+                    
+                });
+            }
+         
+
+        }
         let mut transparent_frame = Frame::default();
         transparent_frame.fill = Color32::TRANSPARENT;
         for (i, txt) in texts.iter().enumerate() {
@@ -100,7 +229,13 @@ impl Renderer {
         egui: &mut EguiGlium,
         system: &mut System,
         old_render: &mut Instant,
-    ) {
+    ) { 
+        let mut game_objects = system.game_objects_mut().game_objects_mut().clone();
+        for (object_id, object) in game_objects.iter_mut() {
+
+            self.get_buffers(system, display,egui,object_id, object);
+
+        }
         let time_since_render = Instant::now().duration_since(*old_render);
         self.last_fps[self.fps_index] = time_since_render.as_nanos() as f32;
         if self.fps_index < 19 {
@@ -162,7 +297,7 @@ impl Renderer {
        
     ) {  
 
-            if game_object.base_properties().should_render(){
+            if game_object.base_properties().should_render() && !game_object.base_properties().ui(){
                 let model = *game_object
                 .base_properties()
                 .transform()
@@ -189,8 +324,9 @@ impl Renderer {
            
         }
         let texts = system.text_mut().clone();
-
-        let (_needs_repaint, shapes) = Self::render_gui(display, egui, fps_mean, time_since_render,texts);
+        let ui_textures = self.ui_textures.clone();
+        let card_textures = self.card_textures.clone();
+        let (_needs_repaint, shapes) = Self::render_gui(system, display, egui, fps_mean, time_since_render,texts, ui_textures, card_textures );
         egui.paint(&display, &mut target, shapes);
         
         target.finish().unwrap();

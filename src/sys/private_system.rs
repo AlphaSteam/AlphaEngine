@@ -34,10 +34,10 @@ impl PrivateSystem {
  
         private_system
     }
-    pub fn start(&mut self, event_manager: &mut EventManager) {
+    pub fn start(&mut self,egui: &mut EguiGlium, event_manager: &mut EventManager) {
         let system = &mut self.system;
         self.game.start(system, event_manager);
-        self.renderer.start(&self.display, system);
+        self.renderer.start(&self.display,egui, system);
     }
 
     pub fn update(

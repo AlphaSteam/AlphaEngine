@@ -6,6 +6,7 @@ use crate::rendering::{texture::Texture, vertex::Vertex, mesh::Mesh};
 pub struct Animations {
     textures: HashMap<String, Texture>,
     current_animation: String,
+    last_animation: String,
     current_index: usize,
     frame_length: f32,
     time_passed: f32,
@@ -15,6 +16,7 @@ impl Animations {
     pub fn new(textures: HashMap<String, Texture>) -> Self {
         Animations {
             current_animation: String::new(),
+            last_animation: String::new(),
             current_index: 0,
             frame_length:0.16,
             time_passed: 0.0,
@@ -25,9 +27,18 @@ impl Animations {
 
         &self.current_animation
     }
+    pub fn last_animation(&self)->&String{
+
+        &self.last_animation
+    }
+
     pub fn current_animation_mut(&mut self)->&mut String{
 
         &mut self.current_animation
+    }
+    pub fn last_animation_mut(&mut self)->&mut String{
+
+        &mut self.last_animation
     }
     pub fn run(&mut self,delta_time: f32){
         let max_index = self.get_current_animation().meta_data().sprites.len();
@@ -47,8 +58,13 @@ impl Animations {
     }
 
     pub fn set_current_animation(&mut self, name: String) {
+        self.last_animation = self.current_animation.clone();
         self.current_animation = name;
         self.current_index = 0;
+    }
+    pub fn set_last_animation(&mut self, name: String) {
+        self.last_animation = name;
+
     }
     pub fn textures(&self)-> &HashMap<String, Texture>{
         &self.textures
